@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-banco-primary: #7C3AED;
+  --color-banco-secondary: #A78BFA;
+  --color-banco-dark: #3C1E3F;
+  --color-banco-base: #110515; /* Base muy oscura para el fondo */
+  --color-banco-light: #EDE9FE;
+}
+
+:root {
+  --background: var(--color-banco-base);
+  --foreground: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  overflow-x: hidden;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gradiente radial de luz premium detrás del Hero */
+.hero-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(124,58,237,0.15) 0%, rgba(167,139,250,0.05) 40%, rgba(245,243,255,0) 70%);
+}
