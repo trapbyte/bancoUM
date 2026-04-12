@@ -62,8 +62,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-8 h-8 rounded-full border-2 border-violet-600 border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -75,28 +75,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const gradientClass = rolColors[rol] ?? rolColors.cliente;
 
   return (
-    <div className={`min-h-screen bg-slate-950 text-white flex ${inter.className}`}>
+    <div className={`h-screen overflow-hidden bg-slate-50 text-slate-900 flex ${inter.className}`}>
 
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-      <aside className="w-64 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col">
+      <aside className="w-64 shrink-0 bg-white border-r border-slate-200 flex flex-col shadow-sm relative z-20 overflow-y-auto">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-slate-800">
+        <div className="px-6 py-6 border-b border-slate-100">
           <Link href="/" className={`font-black text-2xl tracking-tighter ${outfit.className}`}>
-            banco<span className="text-violet-400">UM</span>
+            banco<span className="text-violet-600">UM</span>
           </Link>
         </div>
 
         {/* User badge */}
-        <div className="px-4 py-5 border-b border-slate-800">
-          <div className={`flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r ${gradientClass} bg-opacity-20`}>
-            <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shrink-0 shadow-md`}>
-              <span className="text-sm font-bold text-white">
+        <div className="px-4 py-5 border-b border-slate-100">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 shadow-sm transition-all hover:shadow-md">
+            <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shrink-0 shadow-sm`}>
+              <span className="text-sm font-bold text-white shadow-sm">
                 {userName.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-sm text-white truncate">{userName}</p>
-              <p className="text-xs text-slate-400 truncate">{rolLabels[rol]}</p>
+              <p className="font-semibold text-sm text-slate-800 truncate leading-tight mb-0.5">{userName}</p>
+              <p className="text-[11px] font-medium text-slate-500 tracking-wide uppercase truncate">{rolLabels[rol]}</p>
             </div>
           </div>
         </div>
@@ -112,8 +112,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group
                   ${active
-                    ? "bg-violet-600/20 text-violet-300 border border-violet-500/30"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-violet-50/80 text-violet-700 border border-violet-200 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                   }
                 `}
               >
@@ -126,25 +126,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Sign out */}
-        <div className="px-3 py-4 border-t border-slate-800">
+        <div className="px-3 py-4 border-t border-slate-100">
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all group"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
             Cerrar sesión
           </button>
         </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
-        <header className="h-16 border-b border-slate-800 px-8 flex items-center justify-between bg-slate-900/50 backdrop-blur-sm shrink-0">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10 w-full overflow-hidden">
+        {/* Decorative ambient background */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-sky-600/5 rounded-full blur-[100px] pointer-events-none" />
+
+        {/* Top bar with glassmorphism */}
+        <header className="h-16 border-b border-white/20 px-8 flex items-center justify-between bg-white/60 backdrop-blur-xl shrink-0 sticky top-0 z-30 shadow-sm/50">
           <div />
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-500">{userEmail}</span>
-            <div className={`px-2.5 py-1 text-xs font-bold rounded-full bg-gradient-to-r ${gradientClass} text-white`}>
+            <span className="text-slate-500 font-medium">{userEmail}</span>
+            <div className={`px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r ${gradientClass} text-white shadow-sm`}>
               {rolLabels[rol]}
             </div>
           </div>
@@ -155,7 +159,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex-1 overflow-auto p-8"
+          className="flex-1 overflow-x-hidden overflow-y-auto p-8 relative z-20"
         >
           {children}
         </motion.main>
