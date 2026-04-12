@@ -5,6 +5,7 @@ import { Outfit } from "next/font/google";
 import { Users, CreditCard, UserPlus, AlertCircle, ArrowUpRight, Search } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
 import { SparklineArea } from "@/components/dashboard/Charts";
+import Link from "next/link";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
@@ -81,9 +82,9 @@ export default async function DashboardAsesor() {
             <h2 className={`text-lg font-bold text-slate-800 flex items-center gap-2 ${outfit.className}`}>
               <Users className="w-5 h-5 text-violet-600" /> Clientes Ingresados Recientemente
             </h2>
-            <button className="text-violet-600 hover:text-violet-700 text-sm font-bold flex items-center gap-1 transition-colors">
+            <Link href="/dashboard/asesor/clientes" className="text-violet-600 hover:text-violet-700 text-sm font-bold flex items-center gap-1 transition-colors">
               Base completa <ArrowUpRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
           
           <div className="flex-1 flex flex-col gap-3">
@@ -91,23 +92,18 @@ export default async function DashboardAsesor() {
                <p className="text-sm text-slate-500 text-center py-4">No hay clientes nuevos.</p>
             ) : (
                ultimosClientes.map((cliente) => (
-                 <div key={cliente.id_cliente} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-white/60 hover:bg-slate-50 transition-colors">
-                   <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                     <span className="text-sm font-bold text-slate-600">{cliente.nombres.charAt(0)}{cliente.apellidos.charAt(0)}</span>
-                   </div>
-                   <div className="flex-1 min-w-0">
-                     <p className="text-sm font-bold text-slate-800 truncate">{cliente.nombres} {cliente.apellidos}</p>
-                     <p className="text-xs text-slate-500 truncate">{cliente.email ?? "Sin correo registrado"}</p>
-                   </div>
-                   <div className="text-right shrink-0">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                        Nuevo
-                      </span>
-                   </div>
-                   <button className="p-2 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors">
-                     <Search className="w-4 h-4" />
-                   </button>
-                 </div>
+                  <div key={cliente.id_cliente} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-white/60 hover:bg-slate-50 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-slate-600">{cliente.nombres.charAt(0)}{cliente.apellidos.charAt(0)}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-800 truncate">{cliente.nombres} {cliente.apellidos}</p>
+                      <p className="text-xs text-slate-500 truncate">{cliente.email ?? "Sin correo registrado"}</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 shrink-0">
+                      Nuevo
+                    </span>
+                  </div>
                ))
             )}
           </div>
@@ -139,9 +135,6 @@ export default async function DashboardAsesor() {
                       <p className="text-xs font-bold text-slate-800 truncate">Cc. {c.cliente?.numero_documento}</p>
                       <p className="text-[11px] text-slate-500 truncate">{c.tipo_cuenta.tipo.replace("_", " ")} ****{c.numero_cuenta.slice(-4)}</p>
                     </div>
-                    <button className="px-2 py-1 bg-white border border-slate-200 shadow-sm rounded text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
-                      Revisar
-                    </button>
                   </div>
                 ))
               )}

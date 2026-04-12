@@ -2,8 +2,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { CreditCard, Wallet, AlertCircle, ArrowUpRight, ArrowDownLeft, ShieldCheck } from "lucide-react";
+import { CreditCard, Wallet, AlertCircle, ArrowUpRight, ArrowDownLeft, ShieldCheck, Plus } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import { BtnCrearCuenta, BtnTransaccionesModal, BtnVirtualCardDrawer } from "@/components/dashboard/cliente/CuentasUX";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
@@ -21,15 +22,29 @@ export default async function MisCuentasCliente() {
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
 
+  const reachedLimit = cuentas.length >= 3;
+  const holderName = `${session?.user?.name || "Titular"} ${(session?.user as any)?.lastName || ""}`.trim();
+
+  // Traer los últimos movimientos de estas cuentas
+  const cuentasIds = cuentas.map(c => c.id_cuenta);
+  const rawMovimientos = await prisma.movimiento.findMany({
+     where: { OR: [ { id_cuenta_origen: { in: cuentasIds } }, { id_cuenta_destino: { in: cuentasIds } } ] },
+     orderBy: { fecha: 'desc' },
+     take: 50
+  });
+
   return (
     <div className="space-y-8 relative z-10 w-full max-w-5xl mx-auto pb-10">
       {/* Encabezado */}
-      <div>
-        <h1 className={`text-4xl font-black text-slate-900 tracking-tight ${outfit.className} flex items-center gap-3`}>
-          <Wallet className="w-8 h-8 text-violet-600" />
-          Mis Cuentas
-        </h1>
-        <p className="text-slate-500 mt-2 text-lg">Consulta los detalles y el estado de tus productos activos.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className={`text-4xl font-black text-slate-900 tracking-tight ${outfit.className} flex items-center gap-3`}>
+            <Wallet className="w-8 h-8 text-violet-600" />
+            Mis Cuentas
+          </h1>
+          <p className="text-slate-500 mt-2 text-lg">Consulta los detalles y el estado de tus productos activos.</p>
+        </div>
+        <BtnCrearCuenta reachedLimit={reachedLimit} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -66,7 +81,7 @@ export default async function MisCuentasCliente() {
                   </div>
                   <div>
                     {activa ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
                         <ShieldCheck className="w-3.5 h-3.5" />
                         ACTIVA
                       </span>
@@ -107,21 +122,53 @@ export default async function MisCuentasCliente() {
                   )}
                 </div>
 
-                {/* Acciones */}
+                {/* Acciones Reales Separadas */}
                 <div className="pt-4 border-t border-slate-200/60 mt-auto flex gap-3">
-                   <button 
-                     disabled={!activa}
-                     className="flex-1 flex gap-2 items-center justify-center bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow text-slate-800 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                   >
-                     {esCredito ? <ArrowDownLeft className="w-4 h-4 text-emerald-600" /> : <ArrowUpRight className="w-4 h-4 text-rose-600" />}
-                     {esCredito ? "Pagar Cuota" : "Transferir"}
-                   </button>
-                   <button 
-                     disabled={!activa}
-                     className="flex-1 flex gap-2 items-center justify-center bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow text-slate-800 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                   >
-                     Detalles
-                   </button>
+                   {activa ? (
+                      (() => {
+                         const safeCuenta = {
+                            ...cuenta,
+                            saldo: Number(cuenta.saldo),
+                            limite_credito: cuenta.limite_credito ? Number(cuenta.limite_credito) : null,
+                            tipo_cuenta: {
+                               ...cuenta.tipo_cuenta,
+                               tasa_interes: cuenta.tipo_cuenta.tasa_interes ? Number(cuenta.tipo_cuenta.tasa_interes) : null,
+                               cuota_manejo: cuenta.tipo_cuenta.cuota_manejo ? Number(cuenta.tipo_cuenta.cuota_manejo) : null,
+                            }
+                         };
+                         
+                         const safeMovimientos = rawMovimientos
+                            .filter(m => m.id_cuenta_origen === cuenta.id_cuenta || m.id_cuenta_destino === cuenta.id_cuenta)
+                            .slice(0, 5)
+                            .map(m => ({
+                               ...m,
+                               id_movimiento: m.id_movimiento.toString(),
+                               monto: Number(m.monto),
+                               fecha: m.fecha.toISOString()
+                            }));
+
+                         return (
+                           <>
+                               {/* Pasamos también las cuentas origen disponibles para pagar la TC */}
+                               <BtnTransaccionesModal 
+                                  cuenta={safeCuenta} 
+                                  misCuentas={cuentas
+                                    .filter(c => c.estado === 'ACTIVA' && c.tipo_cuenta.tipo !== "TARJETA_CREDITO")
+                                    .map(c => ({
+                                      id_cuenta: c.id_cuenta,
+                                      numero_cuenta: c.numero_cuenta,
+                                      saldo: Number(c.saldo),
+                                      tipo_cuenta: { tipo: c.tipo_cuenta.tipo }
+                                    }))
+                                  } 
+                               />
+                             <BtnVirtualCardDrawer cuenta={safeCuenta} holderName={holderName} ultimosMovimientos={safeMovimientos} />
+                           </>
+                         );
+                      })()
+                   ) : (
+                      <button disabled className="flex-1 py-2 text-slate-400 font-bold bg-slate-100 rounded-lg text-sm cursor-not-allowed text-center">Cuenta Inactiva</button>
+                   )}
                 </div>
 
               </AnimatedCard>

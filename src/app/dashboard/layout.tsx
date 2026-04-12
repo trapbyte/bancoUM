@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Outfit, Inter } from "next/font/google";
 import Link from "next/link";
-import { motion } from "framer-motion";
+
 import {
   LayoutDashboard, CreditCard, ArrowLeftRight, User,
   Users, Settings, Building2, BookUser,
@@ -104,7 +104,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Nav items */}
         <nav className="flex-1 px-3 py-4 space-y-1">
           {items.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            // Evaluamos si es exactamente el "dashboard home" (/dashboard/rol).
+            const isDashboardHome = ["/dashboard/cliente", "/dashboard/asesor", "/dashboard/operador", "/dashboard/admin"].includes(item.href);
+            const active = isDashboardHome 
+              ? pathname === item.href 
+              : pathname === item.href || pathname.startsWith(item.href + "/");
+              
             return (
               <Link
                 key={item.href}
@@ -129,10 +134,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="px-3 py-4 border-t border-slate-100">
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all group"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all group"
           >
-            <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
             Cerrar sesión
+            <LogOut className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
           </button>
         </div>
       </aside>
@@ -155,14 +160,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content */}
-        <motion.main
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex-1 overflow-x-hidden overflow-y-auto p-8 relative z-20"
+        <main
+          className="flex-1 overflow-x-hidden overflow-y-auto p-8 relative z-20 animate-in fade-in duration-200"
         >
           {children}
-        </motion.main>
+        </main>
       </div>
     </div>
   );

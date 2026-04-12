@@ -2,23 +2,63 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { CreditCard, Search, ChevronRight, ShieldCheck, AlertCircle, Fingerprint } from "lucide-react";
+import { CreditCard, Search, ChevronRight, ShieldCheck, AlertCircle, Fingerprint, ChevronLeft } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
+import { SearchBox } from "@/components/dashboard/SearchInput";
+import Link from "next/link";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
-export default async function CuentasAsesor() {
-  await getServerSession(authOptions);
+export default async function CuentasAsesor({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
+  const session = await getServerSession(authOptions);
 
-  // ── Database Queries ──────────────────────────────────────────────────
+  const resolvedParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+  const q = typeof resolvedParams.q === 'string' ? resolvedParams.q.trim() : "";
+  const PAGE_SIZE = 100;
+  const skip = (page - 1) * PAGE_SIZE;
+
+  // Build search filter
+  const whereFilter = q ? {
+    OR: [
+      { numero_cuenta: { contains: q } },
+      { cliente: { nombres: { contains: q, mode: "insensitive" as const } } },
+      { cliente: { apellidos: { contains: q, mode: "insensitive" as const } } },
+      { cliente: { numero_documento: { contains: q } } },
+    ]
+  } : {};
+
+  // 1. Total count
+  const totalCount = await prisma.cuenta.count({ where: whereFilter });
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  // Count blocked accounts (cheap query, no data transfer)
+  const bloqueadasCount = await prisma.cuenta.count({ where: { estado: 'BLOQUEADA' } });
+
+  // 2. Paginated Query for UI
   const cuentas = await prisma.cuenta.findMany({
+    where: whereFilter,
     orderBy: { fecha_apertura: "desc" },
     include: {
       cliente: true,
       tipo_cuenta: true
     },
-    take: 50,
+    skip,
+    take: PAGE_SIZE,
   });
+
+  // 3. Export handled lazily via API route on button click
+
+  // 4. Asesor info for PDF header
+  const userId = parseInt(session?.user?.id ?? "0", 10);
+  const asesor = await prisma.empleado.findUnique({ where: { id_empleado: userId } });
+  const asesorData = asesor ? {
+    nombre: `${asesor.nombres} ${asesor.apellidos}`,
+    documento: `${asesor.tipo_documento} ${asesor.numero_documento}`,
+    email: asesor.email || "No registrado",
+    cargo: asesor.cargo || "Asesor",
+  } : undefined;
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
@@ -35,25 +75,30 @@ export default async function CuentasAsesor() {
 
       <AnimatedCard className="flex flex-col bg-white/70">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="flex gap-3 w-full sm:w-auto">
-             <div className="relative w-full sm:w-80">
-               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-               <input 
-                 type="text" 
-                 placeholder="Número de cuenta o cédula..." 
-                 className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all shadow-sm text-slate-700" 
-               />
-             </div>
-             <select className="px-4 py-2 border border-slate-200 rounded-xl bg-white text-sm font-semibold shadow-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-200">
-               <option>Todas las cuentas</option>
-               <option>Ahorros</option>
-               <option>Corriente</option>
-               <option>Tarjeta Crédito</option>
-             </select>
+          <SearchBox
+            defaultValue={q}
+            placeholder="Número de cuenta o cédula del cliente..."
+          />
+          <div className="flex gap-3">
+            <select className="px-4 py-2 border border-slate-200 rounded-xl bg-white text-sm font-semibold shadow-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-200">
+              <option>Todas las cuentas</option>
+              <option>Ahorros</option>
+              <option>Corriente</option>
+              <option>Tarjeta Crédito</option>
+            </select>
           </div>
-          <div className="flex gap-2">
-            <span className="px-3 py-1 bg-rose-100 text-rose-700 font-bold rounded text-xs">Bloqueadas: {cuentas.filter(c => c.estado === 'BLOQUEADA').length}</span>
-            <span className="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded text-xs">Total: {cuentas.length}</span>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 hidden sm:flex">
+              <span className="px-3 py-1 bg-rose-100 text-rose-700 font-bold rounded text-xs">Bloq: {bloqueadasCount}</span>
+              <span className="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded text-xs">Pagina {page} de {totalPages || 1} • Total: {totalCount}</span>
+            </div>
+            <ExportDataBtn 
+              title="Reporte Global de Cuentas BancoUM"
+              filename="Cuentas_BancoUM_Todas"
+              columns={["No. Cuenta", "Cliente", "Tipo Producto", "Saldo (COP)", "Estado", "Apertura"]}
+              asesorData={asesorData}
+              fetchUrl={`/api/export?type=cuentas${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+            />
           </div>
         </div>
 
@@ -65,7 +110,6 @@ export default async function CuentasAsesor() {
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Titular</th>
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider text-right">Saldo / Cupo</th>
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider text-center">Estado</th>
-                <th className="px-6 py-4 text-center"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -117,18 +161,28 @@ export default async function CuentasAsesor() {
                             </span>
                           )}
                        </td>
-                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button className="p-2 text-slate-300 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                            <ChevronRight className="w-5 h-5" />
-                          </button>
-                       </td>
-                    </tr>
+                     </tr>
                   )
                 })
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-6 border-t border-slate-200 mt-6 px-2">
+             <p className="text-sm font-bold text-slate-500">Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, totalCount)} de {totalCount} cuentas</p>
+             <div className="flex gap-2">
+                <Link href={`?page=${page - 1}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page <= 1 ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
+                </Link>
+                <Link href={`?page=${page + 1}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page >= totalPages ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   Siguiente <ChevronRight className="w-5 h-5 ml-1" />
+                </Link>
+             </div>
+          </div>
+        )}
       </AnimatedCard>
     </div>
   );

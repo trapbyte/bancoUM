@@ -2,29 +2,54 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { ArrowLeftRight, ArrowDownLeft, ArrowUpRight, Search, FileText } from "lucide-react";
+import { ArrowLeftRight, ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
+import { MovimientosSearchBox } from "@/components/dashboard/SearchInput";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
-export default async function MisMovimientosCliente() {
+export default async function MisMovimientosCliente({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const resolvedParams = await searchParams;
+  const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : "";
   const session = await getServerSession(authOptions);
   const userId = parseInt(session?.user?.id ?? "0", 10);
 
-  // ── Database Queries ──────────────────────────────────────────────────
   const misCuentas = await prisma.cuenta.findMany({
     where: { id_cliente: userId },
     select: { id_cuenta: true, numero_cuenta: true, tipo_cuenta: { select: { tipo: true } } },
   });
   const misCuentasIds = misCuentas.map((c) => c.id_cuenta);
 
+  const clienteData = await prisma.cliente.findUnique({
+    where: { id_cliente: userId },
+    include: {
+      barrio: { include: { comuna: { include: { municipio: { include: { departamento: true } } } } } }
+    }
+  });
+
   let movimientos: any[] = [];
   if (misCuentasIds.length > 0) {
+    let searchFilter: any = {};
+    if (q) {
+       const isNum = !isNaN(Number(q)) && q.trim() !== "";
+       searchFilter = {
+         OR: [
+           { referencia_externa: { contains: q, mode: 'insensitive' } },
+           { descripcion: { contains: q, mode: 'insensitive' } },
+           ...(isNum ? [{ id_movimiento: BigInt(q) }] : [])
+         ]
+       };
+    }
+
     movimientos = await prisma.movimiento.findMany({
       where: {
-        OR: [
-          { id_cuenta_origen: { in: misCuentasIds } },
-          { id_cuenta_destino: { in: misCuentasIds } }
+        AND: [
+          { OR: [
+            { id_cuenta_origen: { in: misCuentasIds } },
+            { id_cuenta_destino: { in: misCuentasIds } }
+          ]},
+          q ? searchFilter : {}
         ]
       },
       include: {
@@ -32,7 +57,7 @@ export default async function MisMovimientosCliente() {
         cuenta_movimiento_id_cuenta_destinoTocuenta: { select: { numero_cuenta: true } }
       },
       orderBy: { fecha: "desc" },
-      take: 25, // Limitar a los 25 más recientes por desempeño
+      take: q ? 100 : 25, // Si está buscando, ampliamos la cantidad de resultados
     });
   }
 
@@ -44,7 +69,7 @@ export default async function MisMovimientosCliente() {
       {/* Encabezado */}
       <div>
         <h1 className={`text-4xl font-black text-slate-900 tracking-tight ${outfit.className} flex items-center gap-3`}>
-          <ArrowLeftRight className="w-8 h-8 text-emerald-600" />
+          <ArrowLeftRight className="w-8 h-8 text-violet-600" />
           Historial de Movimientos
         </h1>
         <p className="text-slate-500 mt-2 text-lg">Consulta, filtra y rastrea tus transacciones bancarias recientes.</p>
@@ -52,18 +77,20 @@ export default async function MisMovimientosCliente() {
 
       <AnimatedCard className="flex flex-col bg-white/70">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="relative w-full sm:w-96">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar por referencia, descripción o cuenta..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all shadow-sm text-slate-700" 
-            />
-          </div>
-          <button className="w-full sm:w-auto px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors">
-            <FileText className="w-4 h-4" />
-            Exportar Extracto
-          </button>
+          <MovimientosSearchBox defaultValue={q} />
+          <ExportDataBtn 
+            title="Extracto Bancario - Mis Movimientos"
+            filename="BancoUM_Extracto_Movimientos"
+            columns={["Fecha", "Referencia", "Operación", "Concepto", "Monto", "Estado"]}
+            data={movimientos.map((m) => ({
+               fecha: m.fecha ? new Date(m.fecha).toLocaleString() : "N/A",
+               ref: m.referencia_externa || m.id_movimiento.toString(),
+               tipo: m.tipo.replace("_", " "),
+               desc: m.descripcion || "Sin Detalles",
+               monto: Number(m.monto),
+               estado: m.estado
+            }))}
+          />
         </div>
 
         <div className="flex-1 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-inner">
@@ -83,21 +110,24 @@ export default async function MisMovimientosCliente() {
                   <td colSpan={5} className="text-center py-16 text-slate-500">
                     <div className="flex flex-col items-center justify-center gap-3">
                        <ArrowLeftRight className="w-10 h-10 text-slate-300" />
-                       <p className="font-semibold text-lg text-slate-600">No hay movimientos recientes</p>
+                       <p className="font-semibold text-lg text-slate-600">
+                         {q ? `Ningún elemento coincide con la búsqueda "${q}"` : "No hay movimientos recientes"}
+                       </p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 movimientos.map((m) => {
-                  const esIngreso = misCuentasIds.includes(m.id_cuenta_destino ?? -1);
+                  const esRechazado = m.estado === "RECHAZADO";
+                  const esIngreso = misCuentasIds.includes(m.id_cuenta_destino ?? -1) && !esRechazado;
                   const Icon = esIngreso ? ArrowDownLeft : ArrowUpRight;
-                  const colorColor = esIngreso ? "text-emerald-600" : "text-slate-800";
-                  const bgColor = esIngreso ? "bg-emerald-100" : "bg-slate-100";
-                  const signo = esIngreso ? "+" : "-";
+                  const colorColor = esRechazado ? "text-rose-500 opacity-60" : esIngreso ? "text-emerald-600" : "text-rose-600";
+                  const bgColor = esRechazado ? "bg-rose-100" : esIngreso ? "bg-emerald-100" : "bg-rose-50";
+                  const signo = esRechazado ? "✗" : esIngreso ? "+" : "-";
                   const montoRaw = Number(m.monto);
 
                   return (
-                    <tr key={Number(m.id_movimiento)} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={Number(m.id_movimiento)} className={`transition-colors ${esRechazado ? 'bg-rose-50/30' : 'hover:bg-slate-50/60'}`}>
                        <td className="px-6 py-4 whitespace-nowrap">
                          <p className="font-bold text-slate-800">{new Date(m.fecha).toLocaleDateString()}</p>
                          <p className="text-xs text-slate-400 font-mono mt-0.5">REF: {m.referencia_externa ?? String(m.id_movimiento)}</p>
@@ -113,15 +143,16 @@ export default async function MisMovimientosCliente() {
                          </div>
                        </td>
                        <td className="px-6 py-4">
-                         <p className="font-medium text-slate-700 truncate max-w-xs">{m.descripcion || "Transferencia digital"}</p>
+                         <p className="font-medium text-slate-700 truncate max-w-xs">{m.descripcion || "Transacción electrónica"}</p>
                          <p className="text-xs text-slate-400 mt-0.5">
-                           Origen: {m.cuenta_movimiento_id_cuenta_origenTocuenta?.numero_cuenta ? `****${m.cuenta_movimiento_id_cuenta_origenTocuenta.numero_cuenta.slice(-4)}` : "Externa"} 
+                           O: {m.cuenta_movimiento_id_cuenta_origenTocuenta?.numero_cuenta ? `****${m.cuenta_movimiento_id_cuenta_origenTocuenta.numero_cuenta.slice(-4)}` : "Banco "} 
                            <span className="mx-1">→</span>
-                           Destino: {m.cuenta_movimiento_id_cuenta_destinoTocuenta?.numero_cuenta ? `****${m.cuenta_movimiento_id_cuenta_destinoTocuenta.numero_cuenta.slice(-4)}` : "Externa"}
+                           D: {m.cuenta_movimiento_id_cuenta_destinoTocuenta?.numero_cuenta ? `****${m.cuenta_movimiento_id_cuenta_destinoTocuenta.numero_cuenta.slice(-4)}` : "Banco"}
                          </p>
                        </td>
                        <td className={`px-6 py-4 whitespace-nowrap text-right font-black ${montoRaw > 1000000 ? "text-lg" : "text-base"} ${colorColor}`}>
-                         {signo}{formatCurrency(montoRaw)}
+                         {esRechazado ? <span className="line-through mr-1 opacity-70">{formatCurrency(montoRaw)}</span> : `${signo}${formatCurrency(montoRaw)}`}
+                         {esRechazado && <span className="text-xs text-rose-500 ml-1">FAIL</span>}
                        </td>
                        <td className="px-6 py-4 whitespace-nowrap text-center">
                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${

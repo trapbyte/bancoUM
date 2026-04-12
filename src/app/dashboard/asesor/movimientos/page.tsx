@@ -2,27 +2,65 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { ArrowLeftRight, Search, FileText, ArrowRight, CornerDownRight } from "lucide-react";
+import { ArrowLeftRight, Search, FileText, ArrowRight, CornerDownRight, ChevronLeft, ChevronRight } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
+import { SearchBox } from "@/components/dashboard/SearchInput";
+import Link from "next/link";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
-export default async function MovimientosAsesor() {
-  await getServerSession(authOptions);
+export default async function MovimientosAsesor({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
+  const session = await getServerSession(authOptions);
 
-  // ── Database Queries ──────────────────────────────────────────────────
+  const resolvedParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+  const q = typeof resolvedParams.q === 'string' ? resolvedParams.q.trim() : "";
+  const PAGE_SIZE = 100;
+  const skip = (page - 1) * PAGE_SIZE;
+
+  // Build Prisma search filter
+  const whereFilter = q ? {
+    OR: [
+      { referencia_externa: { contains: q, mode: "insensitive" as const } },
+      { descripcion: { contains: q, mode: "insensitive" as const } },
+      { cuenta_movimiento_id_cuenta_origenTocuenta: { numero_cuenta: { contains: q } } },
+      { cuenta_movimiento_id_cuenta_destinoTocuenta: { numero_cuenta: { contains: q } } },
+    ]
+  } : {};
+
+  // 1. Total count (with filter)
+  const totalCount = await prisma.movimiento.count({ where: whereFilter });
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  // 2. Paginated Query for UI
   const movimientos = await prisma.movimiento.findMany({
+    where: whereFilter,
     orderBy: { fecha: "desc" },
     include: {
       cuenta_movimiento_id_cuenta_origenTocuenta: { select: { numero_cuenta: true, cliente: { select: { nombres: true, apellidos: true, numero_documento: true } } } },
       cuenta_movimiento_id_cuenta_destinoTocuenta: { select: { numero_cuenta: true, cliente: { select: { nombres: true, apellidos: true, numero_documento: true } } } },
       punto_atencion: { select: { nombre: true, tipo: true } }
     },
-    take: 50,
+    skip,
+    take: PAGE_SIZE,
   });
+
+  // 3. Export Query is handled lazily via API route on button click - no heavy query on page load
+
+  // 4. Asesor info for PDF header
+  const userId = parseInt(session?.user?.id ?? "0", 10);
+  const asesor = await prisma.empleado.findUnique({ where: { id_empleado: userId } });
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
+
+  const asesorData = asesor ? {
+    nombre: `${asesor.nombres} ${asesor.apellidos}`,
+    documento: `${asesor.tipo_documento} ${asesor.numero_documento}`,
+    email: asesor.email || "No registrado",
+    cargo: asesor.cargo || "Asesor",
+  } : undefined;
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-7xl mx-auto pb-10">
@@ -36,18 +74,21 @@ export default async function MovimientosAsesor() {
 
       <AnimatedCard className="flex flex-col bg-white/70">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="relative w-full sm:w-[450px]">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar ID de referencia, documento o número de cuenta..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all shadow-sm text-slate-700" 
+          <SearchBox
+            defaultValue={q}
+            placeholder="Buscar referencia, cuenta, descripción..."
+            width="w-full sm:w-[450px]"
+          />
+          <div className="flex items-center gap-4">
+            <p className="text-sm font-bold text-slate-400 hidden sm:block">Página {page} de {totalPages || 1} • Total: {totalCount}</p>
+            <ExportDataBtn 
+              title="Auditoría Transaccional Global"
+              filename="Movimientos_Asesor_BancoUM_Total"
+              columns={["ID/Ref", "Fecha", "Tipo Operación", "Origen", "Destino", "Monto (COP)", "Estado", "Punto/Canal"]}
+              asesorData={asesorData}
+              fetchUrl={`/api/export?type=movimientos${q ? `&q=${encodeURIComponent(q)}` : ''}`}
             />
           </div>
-          <button className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors">
-            <FileText className="w-4 h-4" />
-            Generar Reporte Excel
-          </button>
         </div>
 
         <div className="flex-1 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-inner">
@@ -64,7 +105,7 @@ export default async function MovimientosAsesor() {
               {movimientos.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-16 text-slate-500">
-                    <p className="font-semibold text-lg">Sin movimientos registrados recientemente.</p>
+                    <p className="font-semibold text-lg">{q ? `Ningún resultado para "${q}"` : "Sin movimientos registrados."}</p>
                   </td>
                 </tr>
               ) : (
@@ -158,6 +199,21 @@ export default async function MovimientosAsesor() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-6 border-t border-slate-200 mt-6 px-2">
+             <p className="text-sm font-bold text-slate-500">Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, totalCount)} de {totalCount} movimientos</p>
+             <div className="flex gap-2">
+                <Link href={`?page=${page - 1}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page <= 1 ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
+                </Link>
+                <Link href={`?page=${page + 1}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page >= totalPages ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   Siguiente <ChevronRight className="w-5 h-5 ml-1" />
+                </Link>
+             </div>
+          </div>
+        )}
       </AnimatedCard>
     </div>
   );

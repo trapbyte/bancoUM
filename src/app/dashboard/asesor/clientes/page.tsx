@@ -2,23 +2,59 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { Users, Search, ChevronRight, Fingerprint, MapPin, Mail } from "lucide-react";
+import { Users, Search, ChevronRight, Fingerprint, MapPin, Mail, ChevronLeft } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
+import { SearchBox } from "@/components/dashboard/SearchInput";
+import Link from "next/link";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
-export default async function ClientesAsesor() {
-  await getServerSession(authOptions);
+export default async function ClientesAsesor({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
+  const session = await getServerSession(authOptions);
 
-  // ── Database Queries ──────────────────────────────────────────────────
-  // Limitamos a los 50 más recientes para propósitos del prototipo UI
+  const resolvedParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+  const q = typeof resolvedParams.q === 'string' ? resolvedParams.q.trim() : "";
+  const PAGE_SIZE = 100;
+  const skip = (page - 1) * PAGE_SIZE;
+
+  // Build search filter
+  const whereFilter = q ? {
+    OR: [
+      { nombres: { contains: q, mode: "insensitive" as const } },
+      { apellidos: { contains: q, mode: "insensitive" as const } },
+      { numero_documento: { contains: q } },
+      { email: { contains: q, mode: "insensitive" as const } },
+    ]
+  } : {};
+
+  // 1. Total count for pagination math
+  const totalCount = await prisma.cliente.count({ where: whereFilter });
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  // 2. Query clients for the current UI page
   const clientes = await prisma.cliente.findMany({
+    where: whereFilter,
     orderBy: { fecha_registro: "desc" },
     include: {
       barrio: { include: { comuna: { include: { municipio: true } } } }
     },
-    take: 50,
+    skip,
+    take: PAGE_SIZE,
   });
+
+  // 3. Export handled lazily via API route on button click
+
+  // 4. Asesor info for PDF header
+  const userId = parseInt(session?.user?.id ?? "0", 10);
+  const asesor = await prisma.empleado.findUnique({ where: { id_empleado: userId } });
+  const asesorData = asesor ? {
+    nombre: `${asesor.nombres} ${asesor.apellidos}`,
+    documento: `${asesor.tipo_documento} ${asesor.numero_documento}`,
+    email: asesor.email || "No registrado",
+    cargo: asesor.cargo || "Asesor",
+  } : undefined;
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-6xl mx-auto pb-10">
@@ -32,15 +68,20 @@ export default async function ClientesAsesor() {
 
       <AnimatedCard className="flex flex-col bg-white/70">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="relative w-full sm:w-96">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar por cédula o nombre..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all shadow-sm text-slate-700" 
+          <SearchBox
+            defaultValue={q}
+            placeholder="Buscar por nombre, cédula o correo..."
+          />
+          <div className="flex items-center gap-4">
+            <p className="text-sm font-bold text-slate-400 hidden sm:block">Página {page} de {totalPages || 1} • Total: {totalCount}</p>
+            <ExportDataBtn 
+              title="Reporte Histórico Total Directorio de Clientes"
+              filename="Clientes_BancoUM_Total"
+              columns={["ID Sistema", "Nombre Completo", "Identidad", "Correo", "Teléfono", "Fecha de Registro", "Ubicación"]}
+              asesorData={asesorData}
+              fetchUrl={`/api/export?type=clientes${q ? `&q=${encodeURIComponent(q)}` : ''}`}
             />
           </div>
-          <p className="text-sm font-bold text-slate-400">Total listados: {clientes.length}</p>
         </div>
 
         <div className="flex-1 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-inner">
@@ -51,14 +92,13 @@ export default async function ClientesAsesor() {
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Identidad</th>
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Contacto</th>
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Antigüedad</th>
-                <th className="px-6 py-4 text-center"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {clientes.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-16 text-slate-500">
-                    <p className="font-semibold">No hay clientes registrados en el sistema.</p>
+                    <p className="font-semibold">{q ? `Ningún cliente coincide con "${q}"` : "No hay clientes registrados en el sistema."}</p>
                   </td>
                 </tr>
               ) : (
@@ -105,11 +145,6 @@ export default async function ClientesAsesor() {
                        <td className="px-6 py-4 whitespace-nowrap">
                           <p className="font-semibold text-slate-700">{ant.toLocaleDateString()}</p>
                        </td>
-                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button className="p-2 text-slate-300 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
-                            <ChevronRight className="w-5 h-5" />
-                          </button>
-                       </td>
                     </tr>
                   )
                 })
@@ -117,6 +152,21 @@ export default async function ClientesAsesor() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-6 border-t border-slate-200 mt-6 px-2">
+             <p className="text-sm font-bold text-slate-500">Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, totalCount)} de {totalCount} registros</p>
+             <div className="flex gap-2">
+                <Link href={`?page=${page - 1}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page <= 1 ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
+                </Link>
+                <Link href={`?page=${page + 1}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page >= totalPages ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   Siguiente <ChevronRight className="w-5 h-5 ml-1" />
+                </Link>
+             </div>
+          </div>
+        )}
       </AnimatedCard>
     </div>
   );
