@@ -1,0 +1,66 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { Outfit } from "next/font/google";
+import { Users, CreditCard, ArrowLeftRight, UserPlus } from "lucide-react";
+import { motion } from "framer-motion";
+
+const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
+
+const actions = [
+  { label: "Clientes registrados", value: "—", icon: <Users className="w-5 h-5" />, color: "from-sky-600 to-sky-800" },
+  { label: "Cuentas activas", value: "—", icon: <CreditCard className="w-5 h-5" />, color: "from-violet-600 to-violet-800" },
+  { label: "Movimientos hoy", value: "—", icon: <ArrowLeftRight className="w-5 h-5" />, color: "from-emerald-600 to-emerald-800" },
+  { label: "Nuevos clientes (mes)", value: "—", icon: <UserPlus className="w-5 h-5" />, color: "from-amber-600 to-amber-800" },
+];
+
+export default function DashboardAsesor() {
+  const { data: session } = useSession();
+  const nombre = session?.user?.name?.split(" ")[0] ?? "Asesor";
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className={`text-3xl font-black text-white ${outfit.className}`}>
+          Panel del Asesor — {nombre}
+        </h1>
+        <p className="text-slate-400 mt-1">Gestiona clientes, cuentas y movimientos desde aquí.</p>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {actions.map((card, i) => (
+          <motion.div
+            key={card.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.07 }}
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition-all"
+          >
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 shadow-lg`}>
+              {card.icon}
+            </div>
+            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{card.label}</p>
+            <p className="text-2xl font-black text-white mt-1">{card.value}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 className={`text-lg font-bold text-white mb-4 ${outfit.className}`}>Clientes Recientes</h2>
+          <div className="flex flex-col items-center justify-center h-40 text-slate-600">
+            <Users className="w-8 h-8 mb-2 opacity-40" />
+            <p className="text-sm">Lista de clientes recientes — próximamente.</p>
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 className={`text-lg font-bold text-white mb-4 ${outfit.className}`}>Cuentas con Alertas</h2>
+          <div className="flex flex-col items-center justify-center h-40 text-slate-600">
+            <CreditCard className="w-8 h-8 mb-2 opacity-40" />
+            <p className="text-sm">Cuentas bloqueadas o con límite — próximamente.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

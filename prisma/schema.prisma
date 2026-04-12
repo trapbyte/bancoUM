@@ -42,6 +42,7 @@ model cliente {
   id_barrio        Int?
   fecha_registro   DateTime?        @default(now()) @db.Timestamp(6)
   activo           Boolean?         @default(true)
+  password_hash    String?          @db.VarChar(255)
   barrio           barrio?          @relation(fields: [id_barrio], references: [id_barrio], onDelete: NoAction, onUpdate: NoAction)
   cliente_cuenta   cliente_cuenta[]
   cuenta           cuenta[]
@@ -105,6 +106,8 @@ model empleado {
   cargo              String           @db.VarChar(100)
   fecha_contratacion DateTime         @db.Date
   activo             Boolean?         @default(true)
+  email              String?          @db.VarChar(150)
+  password_hash      String?          @db.VarChar(255)
   empleado_punto     empleado_punto[]
   movimiento         movimiento[]
 }
