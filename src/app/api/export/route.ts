@@ -109,6 +109,40 @@ export async function GET(request: Request) {
       return NextResponse.json({ data });
     }
 
+    if (type === "empleados") {
+      const whereFilter: any = q ? {
+        OR: [
+          { nombres: { contains: q, mode: "insensitive" } },
+          { apellidos: { contains: q, mode: "insensitive" } },
+          { numero_documento: { contains: q } },
+          { cargo: { contains: q, mode: "insensitive" } },
+        ]
+      } : {};
+
+      const rows = await prisma.empleado.findMany({
+        where: whereFilter,
+        orderBy: { fecha_contratacion: "desc" },
+        include: {
+          empleado_punto: { include: { punto_atencion: { select: { nombre: true } } } }
+        },
+        take: 5000,
+      });
+
+      const data = rows.map(emp => ({
+        doc: emp.numero_documento,
+        nombre: `${emp.nombres} ${emp.apellidos}`,
+        cargo: emp.cargo.replace(/_/g, " "),
+        email: emp.email || "N/A",
+        estado: emp.activo ? "Activo" : "Retirado",
+        asignaciones: emp.empleado_punto.length > 0 
+          ? emp.empleado_punto.map(ep => ep.punto_atencion.nombre).join(" | ")
+          : "Sin asignar",
+        contratacion: emp.fecha_contratacion ? new Date(emp.fecha_contratacion).toLocaleDateString() : "N/A"
+      }));
+
+      return NextResponse.json({ data });
+    }
+
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   } catch (err) {
     console.error("[export-api]", err);

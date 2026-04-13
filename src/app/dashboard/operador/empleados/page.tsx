@@ -2,23 +2,60 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { Users, Search, Briefcase, Mail, Phone, Calendar, Fingerprint, Building2 } from "lucide-react";
+import { Users, Briefcase, Mail, Phone, Calendar, Fingerprint, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import { SearchBox } from "@/components/dashboard/SearchInput";
+import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
+import Link from "next/link";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
-export default async function EmpleadosOperador() {
-  await getServerSession(authOptions);
+export default async function EmpleadosOperador({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
+  const session = await getServerSession(authOptions);
 
-  // ── Database Queries ──────────────────────────────────────────────────
+  const resolvedParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+  const q = typeof resolvedParams.q === 'string' ? resolvedParams.q.trim() : "";
+  const PAGE_SIZE = 50;
+  const skip = (page - 1) * PAGE_SIZE;
+
+  // Build search filter
+  const whereFilter = q ? {
+    OR: [
+      { nombres: { contains: q, mode: "insensitive" as const } },
+      { apellidos: { contains: q, mode: "insensitive" as const } },
+      { numero_documento: { contains: q } },
+      { cargo: { contains: q, mode: "insensitive" as const } },
+    ]
+  } : {};
+
+  // Database Queries
+  const totalCount = await prisma.empleado.count({ where: whereFilter });
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  
+  const totalActivosCount = await prisma.empleado.count({ where: { activo: true } });
+
   const empleados = await prisma.empleado.findMany({
+    where: whereFilter,
     orderBy: { fecha_contratacion: "desc" },
     include: {
       empleado_punto: {
         include: { punto_atencion: true }
       }
-    }
+    },
+    skip,
+    take: PAGE_SIZE,
   });
+
+  // Operador info for PDF header
+  const userId = parseInt(session?.user?.id ?? "0", 10);
+  const operador = await prisma.empleado.findUnique({ where: { id_empleado: userId } });
+  const operadorData = operador ? {
+    nombre: `${operador.nombres} ${operador.apellidos}`,
+    documento: `${operador.tipo_documento} ${operador.numero_documento}`,
+    email: operador.email || "No registrado",
+    cargo: operador.cargo || "Operador",
+  } : undefined;
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
@@ -34,22 +71,28 @@ export default async function EmpleadosOperador() {
       </div>
 
       <AnimatedCard className="flex flex-col bg-white/70">
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="relative w-full sm:w-[400px]">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar personal corporativo..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all shadow-sm text-slate-700" 
-            />
-          </div>
-          <div className="hidden sm:flex gap-2">
-             <span className="px-3 py-1 bg-emerald-100/50 text-emerald-700 font-bold rounded-lg border border-emerald-100 text-xs shadow-sm">
-               Activos: {empleados.filter(e => e.activo).length}
-             </span>
-             <span className="px-3 py-1 bg-slate-100 text-slate-600 font-bold rounded-lg border border-slate-200 text-xs shadow-sm">
-               Total Org: {empleados.length}
-             </span>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <SearchBox
+            defaultValue={q}
+            placeholder="Buscar personal por nombre, cédula o cargo..."
+          />
+          <div className="flex items-center gap-4">
+             <div className="hidden sm:flex gap-2">
+                <span className="px-3 py-1 bg-emerald-100/50 text-emerald-700 font-bold rounded-lg border border-emerald-100 text-xs shadow-sm">
+                  Activos: {totalActivosCount}
+                </span>
+                <span className="px-3 py-1 bg-slate-100 text-slate-600 font-bold rounded-lg border border-slate-200 text-xs shadow-sm">
+                  Pagina {page} de {totalPages || 1}
+                </span>
+             </div>
+             
+             <ExportDataBtn 
+                title="Consolidado del Personal y Asignación Institucional"
+                filename="Empleados_BancoUM"
+                columns={["Identificación", "Nombre Completo", "Cargo", "Correo", "Estado", "Puntos Asignados", "Contratación"]}
+                asesorData={operadorData}
+                fetchUrl={`/api/export?type=empleados${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+             />
           </div>
         </div>
 
@@ -132,6 +175,21 @@ export default async function EmpleadosOperador() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-6 border-t border-slate-200 mt-6 px-2">
+             <p className="text-sm font-bold text-slate-500">Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, totalCount)} de {totalCount} empleados</p>
+             <div className="flex gap-2">
+                <Link href={`?page=${page - 1}${q ? `&q=${q}` : ''}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page <= 1 ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
+                </Link>
+                <Link href={`?page=${page + 1}${q ? `&q=${q}` : ''}`} className={`px-4 py-2 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${page >= totalPages ? "bg-slate-100 text-slate-400 pointer-events-none" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                   Siguiente <ChevronRight className="w-5 h-5 ml-1" />
+                </Link>
+             </div>
+          </div>
+        )}
       </AnimatedCard>
     </div>
   );

@@ -5,6 +5,7 @@ import { Outfit } from "next/font/google";
 import { BarChart3, TrendingUp, HandCoins, Activity, Landmark } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
 import { SimpleBarChart, SparklineArea, DonutChart } from "@/components/dashboard/Charts";
+import { PrintBtn } from "@/components/dashboard/admin/PrintBtn";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
@@ -41,20 +42,49 @@ export default async function EstadisticasAdmin() {
     value: tc._count.cuenta
   })).filter(tc => tc.value > 0);
 
-  // Datos simulados para gráficos de volumen histórico (requeriría RAW SQL complejo si es real)
-  const txHistory = [
-    { day: "Lunes", value: 12500000 }, { day: "Martes", value: 24000000 }, { day: "Miércoles", value: 18000000 },
-    { day: "Jueves", value: 32000000 }, { day: "Viernes", value: 45000000 }, { day: "Sábado", value: 5000000 },
-  ];
+  // Datos de volumen histórico real: últimos 7 días
+  const lastWeekDate = new Date();
+  lastWeekDate.setDate(lastWeekDate.getDate() - 6);
+  lastWeekDate.setHours(0,0,0,0);
+  
+  const movsRecent = await prisma.movimiento.findMany({
+    where: { fecha: { gte: lastWeekDate } },
+    select: { fecha: true, monto: true }
+  });
+
+  const daysMap = new Map<string, number>();
+  const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+  
+  // Rellenamos el mapa con los últimos 7 días (para garantizar orden cronológico)
+  const txHistoryTemp = [];
+  for(let i=0; i<7; i++) {
+    const d = new Date(lastWeekDate);
+    d.setDate(d.getDate() + i);
+    const label = dias[d.getDay()];
+    daysMap.set(label, 0);
+    txHistoryTemp.push(label);
+  }
+
+  movsRecent.forEach(m => {
+    const dName = dias[m.fecha.getDay()];
+    if(daysMap.has(dName)) {
+      daysMap.set(dName, daysMap.get(dName)! + Number(m.monto));
+    }
+  });
+
+  const txHistory = txHistoryTemp.map(day => ({ day, value: daysMap.get(day) ?? 0 }));
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-7xl mx-auto pb-10">
-      <div>
-        <h1 className={`text-4xl font-black text-slate-900 tracking-tight ${outfit.className} flex items-center gap-3`}>
-          <BarChart3 className="w-8 h-8 text-fuchsia-600" />
-          Métricas y Business Intelligence (BI)
-        </h1>
-        <p className="text-slate-500 mt-2 text-lg">Visibilidad financiera de alto nivel sobre los flujos de dinero consolidados.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div>
+          <h1 className={`text-4xl font-black text-slate-900 tracking-tight ${outfit.className} flex items-center gap-3`}>
+            <BarChart3 className="w-8 h-8 text-fuchsia-600" />
+            Métricas y Business Intelligence (BI)
+          </h1>
+          <p className="text-slate-500 mt-2 text-lg">Visibilidad financiera de alto nivel sobre los flujos de dinero consolidados.</p>
+        </div>
+        <PrintBtn />
       </div>
 
       {/* Top Value Cards */}

@@ -13,10 +13,11 @@ export default async function DashboardAdmin() {
   const nombre = session?.user?.name?.split(" ")[0] ?? "Admin";
 
   // ── Consultas Base ──────────────────────────────────────────────────
-  const [totalAuditoria, clientesTotales, empleadosTotales] = await Promise.all([
+  const [totalAuditoria, clientesTotales, empleadosTotales, empleadosActivos] = await Promise.all([
     prisma.auditoria_movimiento.count(),
     prisma.cliente.count(),
     prisma.empleado.count(),
+    prisma.empleado.count({ where: { activo: true } })
   ]);
 
   const ultimasAuditorias = await prisma.auditoria_movimiento.findMany({
@@ -28,14 +29,28 @@ export default async function DashboardAdmin() {
     { label: "Registros Auditoría", value: totalAuditoria.toString(), icon: <ShieldCheck className="w-5 h-5 text-white" />, color: "from-rose-500 to-pink-600" },
     { label: "Clientes Totales", value: clientesTotales.toString(), icon: <Users className="w-5 h-5 text-white" />, color: "from-violet-500 to-indigo-600" },
     { label: "Empleados Totales", value: empleadosTotales.toString(), icon: <BarChart3 className="w-5 h-5 text-white" />, color: "from-sky-500 to-blue-600" },
-    { label: "Alertas Severas", value: "0", icon: <AlertTriangle className="w-5 h-5 text-white" />, color: "from-amber-400 to-orange-500" },
+    { label: "Personal Activo", value: empleadosActivos.toString(), icon: <Activity className="w-5 h-5 text-white" />, color: "from-amber-400 to-orange-500" },
   ];
 
-  // System Load simulado para admin
-  const chartData = [
-    { time: "08:00", requests: 120 }, { time: "10:00", requests: 340 }, { time: "12:00", requests: 550 },
-    { time: "14:00", requests: 480 }, { time: "16:00", requests: 620 }, { time: "18:00", requests: 300 },
-  ];
+  // Top 6 Empleados con más movimientos procesados
+  const topEmpleadosRaw = await prisma.movimiento.groupBy({
+    by: ['id_empleado'],
+    _count: { id_movimiento: true },
+    where: { id_empleado: { not: null } },
+    orderBy: { _count: { id_movimiento: 'desc' } },
+    take: 6
+  });
+
+  const empIds = topEmpleadosRaw.map(r => r.id_empleado).filter(id => id !== null) as number[];
+  const empleadosInfo = await prisma.empleado.findMany({
+    where: { id_empleado: { in: empIds } },
+    select: { id_empleado: true, nombres: true }
+  });
+
+  const chartData = topEmpleadosRaw.map(r => {
+    const e = empleadosInfo.find(em => em.id_empleado === r.id_empleado);
+    return { name: e ? e.nombres.split(' ')[0] : 'System', Transacciones: r._count.id_movimiento };
+  });
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-7xl mx-auto pb-10">
@@ -123,10 +138,10 @@ export default async function DashboardAdmin() {
           {/* Gráfico Actividad Server */}
           <AnimatedCard delay={0.4} className="h-48 flex flex-col">
             <h2 className={`text-lg font-bold text-slate-800 flex items-center gap-2 ${outfit.className}`}>
-              <Activity className="w-5 h-5 text-rose-500" /> Carga del Sistema
+              <Activity className="w-5 h-5 text-rose-500" /> Rendimiento de Personal (Txs Procesadas)
             </h2>
             <div className="flex-1 -mx-2 -mb-2">
-               <SimpleBarChart data={chartData} xKey="time" yKey="requests" color="#f43f5e" />
+               <SimpleBarChart data={chartData} xKey="name" yKey="Transacciones" color="#f43f5e" />
             </div>
           </AnimatedCard>
           

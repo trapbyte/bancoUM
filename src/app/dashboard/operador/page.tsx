@@ -38,10 +38,22 @@ export default async function DashboardOperador() {
     { label: "Catálogos Activos", value: tiposCuenta.toString(), icon: <Settings className="w-5 h-5 text-white" />, color: "from-amber-500 to-orange-600" },
   ];
 
-  // Datos simulados para gráfico de cuentas basados en tipos de cuentas reales en mercado
-  const chartData = [
-    { name: "Ahorros", value: 65 }, { name: "Corriente", value: 20 }, { name: "Crédito", value: 15 }
-  ];
+  // Real data for DonutChart based on account types
+  const tipoCuentasInfo = await prisma.tipo_cuenta.findMany();
+  const cuentasAgrupadas = await prisma.cuenta.groupBy({
+    by: ['id_tipo_cuenta'],
+    _count: { id_cuenta: true },
+  });
+
+  const chartData = cuentasAgrupadas
+    .map(grupo => {
+      const tipo = tipoCuentasInfo.find(t => t.id_tipo_cuenta === grupo.id_tipo_cuenta);
+      return {
+        name: tipo ? tipo.tipo.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "Desconocido",
+        value: grupo._count.id_cuenta,
+      };
+    })
+    .filter(item => item.value > 0);
 
   return (
     <div className="space-y-8 relative z-10 w-full max-w-7xl mx-auto pb-10">
@@ -91,7 +103,9 @@ export default async function DashboardOperador() {
                          <Power className="w-4 h-4 text-rose-500" />
                        )}
                      </div>
-                     <p className="text-xs text-slate-500 truncate mt-1">{punto.tipo}</p>
+                     <p className="text-xs text-slate-500 truncate mt-1">
+                       {punto.tipo.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+                     </p>
                      <p className="text-xs text-slate-400 truncate">{punto.barrio.nombre}, {punto.barrio.comuna.municipio.nombre}</p>
                    </div>
                  </div>
