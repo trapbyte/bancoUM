@@ -2,11 +2,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
-import { Users, Search, ChevronRight, Fingerprint, MapPin, Mail, ChevronLeft } from "lucide-react";
+import { Users, Search, ChevronRight, Fingerprint, MapPin, Mail, ChevronLeft, UserPlus } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
 import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
 import { SearchBox } from "@/components/dashboard/SearchInput";
 import Link from "next/link";
+import ClienteManagerRow from "@/components/dashboard/asesor/ClienteManagerBtn";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
@@ -44,6 +45,11 @@ export default async function ClientesAsesor({ searchParams }: { searchParams: P
     take: PAGE_SIZE,
   });
 
+  const barrios = await prisma.barrio.findMany({
+    include: { comuna: { include: { municipio: true } } },
+    orderBy: { nombre: 'asc' }
+  });
+
   // 3. Export handled lazily via API route on button click
 
   // 4. Asesor info for PDF header
@@ -73,6 +79,7 @@ export default async function ClientesAsesor({ searchParams }: { searchParams: P
             placeholder="Buscar por nombre, cédula o correo..."
           />
           <div className="flex items-center gap-4">
+            <ClienteManagerRow barrios={barrios} />
             <p className="text-sm font-bold text-slate-400 hidden sm:block">Página {page} de {totalPages || 1} • Total: {totalCount}</p>
             <ExportDataBtn 
               title="Reporte Histórico Total Directorio de Clientes"
@@ -92,12 +99,13 @@ export default async function ClientesAsesor({ searchParams }: { searchParams: P
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Identidad</th>
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Contacto</th>
                 <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider">Antigüedad</th>
+                <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {clientes.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-16 text-slate-500">
+                  <td colSpan={6} className="text-center py-16 text-slate-500">
                     <p className="font-semibold">{q ? `Ningún cliente coincide con "${q}"` : "No hay clientes registrados en el sistema."}</p>
                   </td>
                 </tr>
@@ -144,6 +152,13 @@ export default async function ClientesAsesor({ searchParams }: { searchParams: P
                        </td>
                        <td className="px-6 py-4 whitespace-nowrap">
                           <p className="font-semibold text-slate-700">{ant.toLocaleDateString()}</p>
+                       </td>
+                       <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <ClienteManagerRow cliente={c} barrios={barrios}>
+                             <button className="text-violet-600 hover:bg-violet-50 p-2 rounded-lg transition-colors inline-flex items-center justify-center">
+                                <ChevronRight className="w-5 h-5" />
+                             </button>
+                          </ClienteManagerRow>
                        </td>
                     </tr>
                   )

@@ -22,7 +22,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+input, textarea, select {
+  color: #0f172a; /* text-slate-900 para contrarrestar el bg blanco en inputs */
+}
+
 /* Gradiente radial de luz premium detrás del Hero */
 .hero-glow {
   background: radial-gradient(circle at 50% 0%, rgba(124,58,237,0.15) 0%, rgba(167,139,250,0.05) 40%, rgba(245,243,255,0) 70%);
 }
+
+html { scroll-behavior: smooth; }
+

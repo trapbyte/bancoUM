@@ -6,7 +6,9 @@ import { NextResponse } from "next/server";
 // GET /api/export?type=movimientos|clientes|cuentas&q=term
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.user.rol === "cliente") {
+    return NextResponse.json({ error: "Forbidden. Access denied." }, { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");

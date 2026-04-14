@@ -37,6 +37,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(allowedBase, request.url));
   }
 
+  // El admin puede acceder a todo el dashboard
+  if (rol === "admin") {
+    return NextResponse.next();
+  }
+
   // Intentar acceder al dashboard de otro rol → redirigir al propio
   if (!pathname.startsWith(allowedBase)) {
     return NextResponse.redirect(new URL(allowedBase, request.url));

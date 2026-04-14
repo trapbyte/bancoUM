@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Outfit } from "next/font/google";
 import { User, Mail, Phone, MapPin, Calendar, ShieldCheck, Fingerprint } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
+import EditarPerfilBtn from "@/components/dashboard/cliente/EditarPerfilBtn";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
 
@@ -48,12 +49,12 @@ export default async function PerfilCliente() {
         <p className="text-slate-500 mt-2 text-lg">Consulta tu información personal y datos de contacto registrados.</p>
       </div>
 
-      <AnimatedCard className="bg-white/80 overflow-hidden !p-0 border border-slate-100/50 shadow-xl shadow-slate-200/40">
+      <AnimatedCard className="bg-white/80 overflow-hidden p-0! border border-slate-100/50 shadow-xl shadow-slate-200/40">
          {/* Cover Background */}
-         <div className="h-40 bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-600 w-full relative overflow-hidden">
+         <div className="h-40 bg-linear-to-br from-violet-700 via-violet-600 to-indigo-600 w-full relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/5 to-black/20" />
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/5 to-black/20" />
+            <div className="absolute top-0 right-0 w-125 h-125 bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3" />
          </div>
 
          {/* Contenido Perfil */}
@@ -61,8 +62,8 @@ export default async function PerfilCliente() {
             {/* Avatar Flotante Centrado */}
             <div className="-mt-20 mb-5 relative group">
                <div className="w-36 h-36 rounded-3xl bg-white p-2 shadow-xl shadow-indigo-900/10 relative z-10 transition-transform group-hover:scale-105 duration-300 mx-auto">
-                 <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl flex items-center justify-center text-5xl font-black text-slate-300 border border-slate-200/50 shadow-inner overflow-hidden relative">
-                   <span className="bg-clip-text text-transparent bg-gradient-to-br from-violet-500 to-indigo-500">
+                 <div className="w-full h-full bg-linear-to-br from-slate-50 to-slate-100 rounded-2xl flex items-center justify-center text-5xl font-black text-slate-300 border border-slate-200/50 shadow-inner overflow-hidden relative">
+                   <span className="bg-clip-text text-transparent bg-linear-to-br from-violet-500 to-indigo-500">
                      {perfil.nombres.charAt(0)}{perfil.apellidos.charAt(0)}
                    </span>
                  </div>
@@ -148,7 +149,7 @@ export default async function PerfilCliente() {
                      </div>
                      <div>
                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lugar de Residencia</p>
-                       <p className="font-medium text-slate-700 break-words">{ubicacionCompleta}</p>
+                       <p className="font-medium text-slate-700 wrap-break-word">{ubicacionCompleta}</p>
                      </div>
                   </div>
                </div>
@@ -157,7 +158,9 @@ export default async function PerfilCliente() {
       </AnimatedCard>
 
       <div className="text-center">
-         <p className="text-sm text-slate-500">¿Encontraste un error en tus datos? <a href="#" className="font-bold text-violet-600 hover:text-violet-700 underline underline-offset-2">Solicita una actualización de perfil</a>.</p>
+         <p className="text-sm text-slate-500">
+           ¿Tus datos de contacto están desactualizados? <EditarPerfilBtn currentEmail={perfil.email || ""} currentPhone={perfil.telefono || ""} />
+         </p>
       </div>
 
     </div>

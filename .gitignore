@@ -40,5 +40,17 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# turbo cache
+.turbo
+
+# Documentos del asistente de IA (Contexto removido del root)
+/docs/AGENTS.md
+/docs/CLAUDE.md
+/docs/instructions.md
+/docs/roles.md
+
+# Archivos de IA legacy (por si vuelven a aparecer en la raíz)
+AGENTS.md
+CLAUDE.md
 instructions.md
 roles.md

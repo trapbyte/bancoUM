@@ -79,7 +79,7 @@ export function HeroSection() {
               <motion.div 
                   initial={{ opacity: 0, y: 150, z: -100, rotateX: 20, rotateZ: -10 }}
                   animate={{ opacity: 1, y: -50, x: -90, z: -50, rotateX: 18, rotateY: 15, rotateZ: -15 }}
-                  transition={{ duration: 1, type: "spring", bounce: 0.3, delay: 0.2 }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
                   className="absolute pointer-events-auto z-10"
               >
                   <HoverCard className="group w-[300px] h-[190px] rounded-[1.25rem] overflow-hidden relative" style={{ background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(20px)', boxShadow: '0 30px 60px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.15)' }}>
@@ -107,7 +107,7 @@ export function HeroSection() {
               <motion.div 
                   initial={{ opacity: 0, y: 200, z: -50, rotateX: 20, rotateZ: 5 }}
                   animate={{ opacity: 1, y: 10, x: 20, z: 0, rotateX: 12, rotateY: -10, rotateZ: 5 }}
-                  transition={{ duration: 1, type: "spring", bounce: 0.3, delay: 0.3 }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
                   className="absolute pointer-events-auto z-20"
               >
                   <HoverCard className="group w-[320px] h-[200px] rounded-[1.25rem] overflow-hidden relative" style={{ 
@@ -139,7 +139,7 @@ export function HeroSection() {
               <motion.div 
                   initial={{ opacity: 0, y: 250, z: 0, rotateX: 20, rotateZ: 15 }}
                   animate={{ opacity: 1, y: 80, x: 80, z: 50, rotateX: 5, rotateY: -15, rotateZ: 8 }}
-                  transition={{ duration: 1, type: "spring", bounce: 0.3, delay: 0.4 }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
                   className="absolute pointer-events-auto z-30 hidden lg:block"
               >
                   <HoverCard className="group w-[300px] h-[190px] rounded-[1.25rem] overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%)', boxShadow: '0 30px 70px rgba(139,92,246,0.3), inset 0 0 0 1px rgba(255,255,255,0.3)' }}>
