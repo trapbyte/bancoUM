@@ -164,8 +164,8 @@ export function BtnTransaccionesModal({ cuenta, misCuentas }: { cuenta: any, mis
                <form onSubmit={handleTransact} className="space-y-4">
                   {txModalMode === "TRANSFERENCIA" && (
                     <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-2 uppercase tracking-wide text-left">Nro. de Cuenta a Transferir</label>
-                      <input name="destino_num" type="text" required placeholder="Ej: 4123..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-50" />
+                      <label className="text-xs font-bold text-slate-500 block mb-2 uppercase tracking-wide text-left">ID o Nro. Cuenta Destino</label>
+                      <input name="destino_num" type="text" required placeholder="Ej: 4 (ID) o AHO-12..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-50" />
                     </div>
                   )}
 

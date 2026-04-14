@@ -58,8 +58,8 @@ export default async function AuditoriaAdmin({ searchParams }: { searchParams: P
              <Link href="/dashboard/admin/auditoria" className="px-4 py-2 bg-slate-900 border border-slate-700 text-white shadow-sm rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-slate-800 transition-colors">
                <RefreshCw className="w-4 h-4" /> Reset
              </Link>
-             <div className="flex-1 w-full sm:w-64">
-               <SearchBox placeholder="Grep ID, usuario, acción..." defaultValue={q} />
+             <div className="flex-1 w-full sm:w-80">
+               <SearchBox placeholder="Grep ID, usuario, acción..." defaultValue={q} width="w-full" />
              </div>
           </div>
         </div>

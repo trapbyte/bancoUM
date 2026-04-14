@@ -75,7 +75,7 @@ export default async function EstadisticasAdmin() {
   const txHistory = txHistoryTemp.map(day => ({ day, value: daysMap.get(day) ?? 0 }));
 
   return (
-    <div className="space-y-8 relative z-10 w-full max-w-7xl mx-auto pb-10">
+    <div id="admin-stats-container" className="space-y-8 relative z-10 w-full max-w-7xl mx-auto pb-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className={`text-4xl font-black text-slate-900 tracking-tight ${outfit.className} flex items-center gap-3`}>
@@ -84,7 +84,13 @@ export default async function EstadisticasAdmin() {
           </h1>
           <p className="text-slate-500 mt-2 text-lg">Visibilidad financiera de alto nivel sobre los flujos de dinero consolidados.</p>
         </div>
-        <PrintBtn />
+        <PrintBtn stats={{
+          totalMovido,
+          totalGuardado,
+          volumenTx,
+          distribucionCuentas,
+          txHistory,
+        }} />
       </div>
 
       {/* Top Value Cards */}

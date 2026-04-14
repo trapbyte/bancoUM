@@ -6,6 +6,7 @@ import Link from "next/link";
 import { SearchBox } from "@/components/dashboard/SearchInput";
 import { ExportDataBtn } from "@/components/dashboard/ExportDataBtn";
 import { ToggleUserBtn } from "@/components/dashboard/admin/ToggleUserBtn";
+import { AddEmpleadoBtn, EditEmpleadoBtn } from "@/components/dashboard/admin/AdminUsuariosClient";
 import { ShieldAlert, Users, Key, MonitorDot, MoreVertical, Edit, Trash2, ChevronLeft, ChevronRight, UserCheck, ShieldCheck } from "lucide-react";
 import AnimatedCard from "@/components/dashboard/AnimatedCard";
 
@@ -31,16 +32,24 @@ export default async function UsuariosAdmin({ searchParams }: { searchParams: Pr
     ]
   } : {};
 
-  const [totalEmpleados, usuarios, totalClientes, gerentes] = await Promise.all([
+  const [totalEmpleados, usuarios, totalClientes, gerentes, puntosAtencion] = await Promise.all([
     prisma.empleado.count({ where: whereClause }),
     prisma.empleado.findMany({
       where: whereClause,
       orderBy: { fecha_contratacion: "asc" },
       skip,
       take: PAGE_SIZE,
+      include: {
+        empleado_punto: {
+            where: { fecha_fin: null },
+            select: { id_punto: true },
+            take: 1
+        }
+      }
     }),
     prisma.cliente.count(),
-    prisma.empleado.count({ where: { cargo: { contains: "Gerente", mode: "insensitive" }, activo: true } })
+    prisma.empleado.count({ where: { cargo: { contains: "Gerente", mode: "insensitive" }, activo: true } }),
+    prisma.punto_atencion.findMany({ select: { id_punto: true, tipo: true, direccion: true } })
   ]);
   
   const totalPages = Math.ceil(totalEmpleados / PAGE_SIZE);
@@ -97,25 +106,28 @@ export default async function UsuariosAdmin({ searchParams }: { searchParams: Pr
          <div className="w-full sm:w-96">
             <SearchBox placeholder="Buscar por DNI, Nombre, Correo, o Cargo..." defaultValue={q} />
          </div>
-         <ExportDataBtn 
-            title="Exportar Reporte Global de Accesos IAM"
-            filename="Accesos_BancoUM"
-            columns={["DNI", "Nombre Completo", "Rol & Cargo", "Correo de Acceso", "Estado", "Antigüedad"]}
-            data={usuarios.map(u => ({
-               DNI: u.numero_documento, 
-               "Nombre Completo": `${u.nombres} ${u.apellidos}`, 
-               "Rol & Cargo": u.cargo.toUpperCase(), 
-               "Correo de Acceso": u.email || "N/A", 
-               Estado: u.activo ? "AUTORIZADO" : "BLOQUEADO", 
-               "Antigüedad": new Date(u.fecha_contratacion).toLocaleDateString()
-            }))}
-            asesorData={{
-               nombre: "SYSTEM",
-               documento: "ADMIN",
-               email: "sysadmin@bancoum.com",
-               cargo: "Administrador Global"
-            }}
-         />
+           <div className="flex gap-2 w-full sm:w-auto">
+             <ExportDataBtn 
+                title="Exportar Reporte Global de Accesos IAM"
+                filename="Accesos_BancoUM"
+                columns={["DNI", "Nombre Completo", "Rol & Cargo", "Correo de Acceso", "Estado", "Antigüedad"]}
+                data={usuarios.map(u => ({
+                   DNI: u.numero_documento, 
+                   "Nombre Completo": `${u.nombres} ${u.apellidos}`, 
+                   "Rol & Cargo": u.cargo.toUpperCase(), 
+                   "Correo de Acceso": u.email || "N/A", 
+                   Estado: u.activo ? "AUTORIZADO" : "BLOQUEADO", 
+                   "Antigüedad": new Date(u.fecha_contratacion).toLocaleDateString()
+                }))}
+                asesorData={{
+                   nombre: "SYSTEM",
+                   documento: "ADMIN",
+                   email: "sysadmin@bancoum.com",
+                   cargo: "Administrador Global"
+                }}
+             />
+             <AddEmpleadoBtn puntosDisponibles={puntosAtencion} />
+           </div>
       </div>
 
       <AnimatedCard className="flex flex-col bg-white/70">
@@ -174,9 +186,7 @@ export default async function UsuariosAdmin({ searchParams }: { searchParams: Pr
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                          <div className="flex items-center justify-end gap-2">
-                            <button className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Modificar Rol">
-                              <Edit className="w-4 h-4" />
-                            </button>
+                            <EditEmpleadoBtn userToEdit={user} puntosDisponibles={puntosAtencion} />
                             <ToggleUserBtn idEmpleado={user.id_empleado} isActivo={user.activo === true} />
                          </div>
                       </td>

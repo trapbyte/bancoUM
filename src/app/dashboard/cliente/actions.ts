@@ -125,8 +125,8 @@ export async function executeTransactionAction(formData: FormData) {
         data: { saldo: nuevoSaldo }
       });
 
-      // 3. Registrar el movimiento explicitando de dónde salieron los fondos si fue un PAGO
-      await tx.movimiento.create({
+      // 3. Registrar el movimiento
+      const nuevoMov = await tx.movimiento.create({
         data: {
           tipo: tipoTx as any,
           monto: rawAmount,
@@ -134,6 +134,16 @@ export async function executeTransactionAction(formData: FormData) {
           ...(tipoTx === "PAGO" ? { id_cuenta_origen: fondAccountId } : {}),
           estado: "CONFIRMADO",
           descripcion: isCredit && tipoTx === "PAGO" ? "Abono / Pago de Tarjeta de Crédito" : "Depósito Consignación Virtual"
+        }
+      });
+
+      // 4. Audit log (app-level, in case DB trigger is not deployed)
+      await tx.auditoria_movimiento.create({
+        data: {
+          id_movimiento: nuevoMov.id_movimiento,
+          usuario_bd: `cliente_${userId}`,
+          accion: "INSERT",
+          datos_nuevos: { tipo: tipoTx, monto: rawAmount, cuenta_destino: originAccountId },
         }
       });
     });
@@ -170,7 +180,7 @@ export async function executeTransactionAction(formData: FormData) {
         data: { saldo: saldoActual + rawAmount }
       });
 
-      await tx.movimiento.create({
+      const nuevoMov2 = await tx.movimiento.create({
          data: {
            tipo: "COMPRA_TARJETA",
            monto: rawAmount,
@@ -180,6 +190,15 @@ export async function executeTransactionAction(formData: FormData) {
            fecha: new Date(),
          }
        });
+
+      await tx.auditoria_movimiento.create({
+        data: {
+          id_movimiento: nuevoMov2.id_movimiento,
+          usuario_bd: `cliente_${userId}`,
+          accion: "INSERT",
+          datos_nuevos: { tipo: "COMPRA_TARJETA", monto: rawAmount, cuenta_origen: originAccountId },
+        }
+      });
     });
 
     revalidatePath("/dashboard/cliente/cuentas");
@@ -190,7 +209,15 @@ export async function executeTransactionAction(formData: FormData) {
   // === BRANCH TRANSFERENCIA ===
   if (tipoTx === "TRANSFERENCIA") {
     // Find destino
-    const destinoCuenta = await prisma.cuenta.findUnique({ where: { numero_cuenta: destinonum } });
+    const numDest = Number(destinonum);
+    const destinoCuenta = await prisma.cuenta.findFirst({ 
+       where: { 
+           OR: [
+              { numero_cuenta: destinonum },
+              { id_cuenta: isNaN(numDest) ? undefined : numDest }
+           ]
+       } 
+    });
     if (!destinoCuenta || destinoCuenta.estado !== "ACTIVA") return { error: "Cuenta destino no disponible o bloqueada." };
 
     // Validar Saldo Disponible (Rejection Path)
@@ -240,7 +267,7 @@ export async function executeTransactionAction(formData: FormData) {
       });
 
       // 3. Log
-      await tx.movimiento.create({
+      const nuevoMov3 = await tx.movimiento.create({
          data: {
            tipo: "TRANSFERENCIA",
            monto: rawAmount,
@@ -251,6 +278,16 @@ export async function executeTransactionAction(formData: FormData) {
            fecha: new Date(),
          }
        });
+
+      // 4. Audit
+      await tx.auditoria_movimiento.create({
+        data: {
+          id_movimiento: nuevoMov3.id_movimiento,
+          usuario_bd: `cliente_${userId}`,
+          accion: "INSERT",
+          datos_nuevos: { tipo: "TRANSFERENCIA", monto: rawAmount, origen: originAccountId, destino: destinoCuenta.id_cuenta },
+        }
+      });
     });
 
     revalidatePath("/dashboard/cliente/cuentas");
