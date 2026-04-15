@@ -51,7 +51,7 @@ export default async function AuditoriaAdmin({ searchParams }: { searchParams: P
             <Terminal className="w-8 h-8 text-emerald-600" />
             Consola Maestra de Auditoría
           </h1>
-          <p className="text-slate-500 mt-2 text-lg">Registro inmutable de acciones DML ejecutadas sobre el motor de Base de Datos.</p>
+          <p className="text-slate-500 mt-2 text-lg">Registro completo de todos los movimientos y operaciones de la plataforma.</p>
         </div>
         <div className="flex flex-col gap-2 w-full sm:w-auto">
           <div className="flex gap-2">

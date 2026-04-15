@@ -158,9 +158,9 @@ export default async function PerfilCliente() {
       </AnimatedCard>
 
       <div className="text-center">
-         <p className="text-sm text-slate-500">
+         <div className="text-sm text-slate-500">
            ¿Tus datos de contacto están desactualizados? <EditarPerfilBtn currentEmail={perfil.email || ""} currentPhone={perfil.telefono || ""} />
-         </p>
+         </div>
       </div>
 
     </div>

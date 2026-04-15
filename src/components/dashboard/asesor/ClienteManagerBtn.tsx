@@ -106,18 +106,18 @@ export default function ClienteManagerRow({
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombres</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Nombres</label>
                       <input name="nombres" required defaultValue={cliente?.nombres} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Apellidos</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Apellidos</label>
                       <input name="apellidos" required defaultValue={cliente?.apellidos} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo Doc</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Tipo Doc</label>
                       <select name="tipo_documento" required defaultValue={cliente?.tipo_documento || "CC"} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50">
                         <option value="CC">Cédula de Ciudadanía</option>
                         <option value="CE">Cédula de Extranjería</option>
@@ -126,29 +126,29 @@ export default function ClienteManagerRow({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Número</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Número</label>
                       <input name="numero_documento" required defaultValue={cliente?.numero_documento} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Email</label>
                       <input name="email" type="email" required defaultValue={cliente?.email} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Teléfono</label>
                       <input name="telefono" defaultValue={cliente?.telefono} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha Nacimiento</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Fecha Nacimiento</label>
                       <input name="fecha_nacimiento" type="date" required defaultValue={cliente?.fecha_nacimiento ? new Date(cliente.fecha_nacimiento).toISOString().split('T')[0] : ""} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Barrio</label>
+                      <label className="block text-sm font-semibold text-slate-700 ml-1 mb-1">Barrio</label>
                       <select name="id_barrio" required defaultValue={cliente?.id_barrio} className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50">
                         <option value="">Seleccione...</option>
                         {barrios?.map(b => (

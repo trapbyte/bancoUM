@@ -46,45 +46,61 @@ function LeafletMap({ municipio, direccion }: { municipio: string; direccion: st
 
     // Dynamically import leaflet to avoid SSR issues
     import("leaflet").then((L) => {
-      // Fix default marker icons
-      (L as any).Icon.Default.mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+
+      const customIcon = L.default.icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
       });
 
-      // Geocode using Nominatim
-      const query = encodeURIComponent(`${direccion}, ${municipio}, Colombia`);
-      fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`)
-        .then(r => r.json())
-        .then(results => {
-          const lat = results[0]?.lat ? parseFloat(results[0].lat) : 4.7110;
-          const lon = results[0]?.lon ? parseFloat(results[0].lon) : -74.0721;
+      const initMap = async () => {
+         try {
+             const query = encodeURIComponent(`${direccion}, ${municipio}, Colombia`);
+             let results = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`).then(r => r.json());
+             
+             let lat, lon, zoom;
+             if (results.length > 0) {
+                 lat = parseFloat(results[0].lat);
+                 lon = parseFloat(results[0].lon);
+                 zoom = 16;
+             } else {
+                 results = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(municipio + ', Colombia')}&format=json&limit=1`).then(r => r.json());
+                 if (results.length > 0) {
+                     lat = parseFloat(results[0].lat);
+                     lon = parseFloat(results[0].lon);
+                     zoom = 14;
+                 } else {
+                     lat = 4.7110; 
+                     lon = -74.0721;
+                     zoom = 12;
+                 }
+             }
 
-          if (!mapRef.current || mapInstance.current) return;
-          
-          const map = L.default.map(mapRef.current).setView([lat, lon], results[0] ? 16 : 12);
-          mapInstance.current = map;
+             if (!mapRef.current || mapInstance.current) return;
+             const map = L.default.map(mapRef.current).setView([lat, lon], zoom);
+             mapInstance.current = map;
 
-          L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 19,
-          }).addTo(map);
+             L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                 attribution: '© OpenStreetMap',
+                 maxZoom: 19
+             }).addTo(map);
 
-          L.default.marker([lat, lon])
-            .addTo(map)
-            .bindPopup(`<b>${direccion}</b><br>${municipio}, Colombia`)
-            .openPopup();
-        })
-        .catch(() => {
-          // Fallback: center on Colombia
-          if (!mapRef.current || mapInstance.current) return;
-          const map = L.default.map(mapRef.current).setView([4.5709, -74.2973], 6);
-          mapInstance.current = map;
-          L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '© OpenStreetMap'
-          }).addTo(map);
-        });
+             L.default.marker([lat, lon], { icon: customIcon })
+                 .addTo(map)
+                 .bindPopup(`<b>${direccion}</b><br>${municipio}, Colombia`)
+                 .openPopup();
+         } catch(e) {
+             if (!mapRef.current || mapInstance.current) return;
+             const map = L.default.map(mapRef.current).setView([4.5709, -74.2973], 6);
+             mapInstance.current = map;
+             L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '© OpenStreetMap' }).addTo(map);
+         }
+      };
+      initMap();
     });
 
     return () => {

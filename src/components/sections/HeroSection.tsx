@@ -60,9 +60,16 @@ export function HeroSection() {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 1 }}
                 className="flex items-center gap-6 mt-6 lg:mt-12 opacity-80"
               >
-                  <div className="flex -space-x-4">
-                      {[1,2,3,4].map((i) => (
-                        <div key={i} className={`w-10 h-10 rounded-full border-2 border-white bg-gray-200 z-[${10-i}]`}></div>
+                  <div className="flex -space-x-4 relative">
+                      {[
+                        { id: 1, src: '/images/pfp1.webp' },
+                        { id: 2, src: '/images/pfp2.webp' },
+                        { id: 3, src: '/images/pfp3.webp' },
+                        { id: 4, src: '/images/pfp4.webp' }
+                      ].map((img, i) => (
+                        <div key={img.id} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden" style={{ zIndex: 10 - i }}>
+                            <img src={img.src} alt={`User ${img.id}`} className="w-full h-full object-cover" />
+                        </div>
                       ))}
                   </div>
                   <div className="flex flex-col text-left">

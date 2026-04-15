@@ -69,7 +69,7 @@ export function TipoCuentaCard({ tcp }: { tcp: any }) {
              
              <div className="p-6 space-y-5">
                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-700 ml-1 tracking-wider mb-1.5">
                     Tasa de Interés (%)
                   </label>
                   <input 
@@ -84,7 +84,7 @@ export function TipoCuentaCard({ tcp }: { tcp: any }) {
                </div>
 
                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-700 ml-1 tracking-wider mb-1.5">
                     Cuota de Manejo (COP)
                   </label>
                   <input 

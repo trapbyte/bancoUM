@@ -61,9 +61,9 @@ export default async function DashboardAdmin() {
         <p className="text-slate-500 mt-2 text-lg">Centro de control global y consola de logs en tiempo real.</p>
       </div>
 
-      <div className="flex items-center gap-3 px-5 py-4 bg-rose-50 border border-rose-200 shadow-sm rounded-2xl text-rose-800 text-sm font-semibold">
-        <ShieldCheck className="w-6 h-6 shrink-0 text-rose-600" />
-        Estás operando con el rol Administrador. Las acciones perjudiciales dispararán alertas inmediatas.
+      <div className="flex items-center gap-3 px-5 py-4 bg-sky-50 border border-sky-200 shadow-sm rounded-2xl text-sky-800 text-sm font-semibold">
+        <ShieldCheck className="w-6 h-6 shrink-0 text-sky-600" />
+        Tienes acceso a las configuraciones globales. Recuerda que tus acciones impactan a los usuarios.
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">

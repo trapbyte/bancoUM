@@ -25,13 +25,13 @@ export function SecuritySection() {
                 >
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#A78BFA] text-sm font-semibold mb-6">
                       <ShieldCheck className="w-4 h-4" />
-                      <span>Seguridad Nivel Bóveda</span>
+                      <span>Seguridad Tu Tranquilidad, Nuestra Prioridad</span>
                   </div>
                   <h2 className={`text-4xl md:text-5xl font-black mb-6 text-white ${outfit.className}`}>
                       Confianza Inquebrantable.
                   </h2>
                   <p className="text-gray-400 text-lg leading-relaxed font-light">
-                      Diseñamos nuestra infraestructura para proteger lo que más te importa, implementando los estándares más exigentes del mundo bancario y encriptación militar.
+                      Protegemos lo que más valoras. Todo nuestro sistema está diseñado para que tu dinero y tus datos estén siempre a salvo de cualquier tipo de amenaza exterior.
                   </p>
                </motion.div>
                
@@ -43,8 +43,8 @@ export function SecuritySection() {
                       <div className="w-12 h-12 rounded-xl bg-[#7C3AED]/20 flex items-center justify-center mb-6 border border-[#7C3AED]/30">
                           <Lock className="w-6 h-6 text-[#A78BFA]" />
                       </div>
-                      <h4 className="text-xl font-bold mb-3 text-white">Encriptación End-to-End</h4>
-                      <p className="text-gray-400 leading-relaxed font-light">Toda tu información personal viaja sobre canales cifrados TLS 1.3 con estándares militares. Nadie excepto tú puede ver tus datos.</p>
+                      <h4 className="text-xl font-bold mb-3 text-white">Privacidad Total</h4>
+                      <p className="text-gray-400 leading-relaxed font-light">Todos tus datos personales e información financiera están blindados para que absolutamente nadie, excepto tú, pueda acceder a ellos.</p>
                   </motion.div>
 
                   <motion.div 
@@ -54,8 +54,8 @@ export function SecuritySection() {
                       <div className="w-12 h-12 rounded-xl bg-[#7C3AED]/20 flex items-center justify-center mb-6 border border-[#7C3AED]/30">
                           <Headphones className="w-6 h-6 text-[#A78BFA]" />
                       </div>
-                      <h4 className="text-xl font-bold mb-3 text-white">Soporte Humano 24/7</h4>
-                      <p className="text-gray-400 leading-relaxed font-light">Atención permanente en caso de emergencias, sin importar la hora o tu ubicación geográfica. Resolvemos bloqueos al instante.</p>
+                      <h4 className="text-xl font-bold mb-3 text-white">Soporte 24/7</h4>
+                      <p className="text-gray-400 leading-relaxed font-light">Atención permanente en caso de emergencias, sin importar la hora o tu ubicación geográfica. Resolvemos tus dudas al instante.</p>
                   </motion.div>
 
                   <motion.div 
@@ -65,8 +65,8 @@ export function SecuritySection() {
                       <div className="w-12 h-12 rounded-xl bg-[#7C3AED]/20 flex items-center justify-center mb-6 border border-[#7C3AED]/30">
                           <Database className="w-6 h-6 text-[#A78BFA]" />
                       </div>
-                      <h4 className="text-xl font-bold mb-3 text-white">Infraestructura Distribuida Seguro</h4>
-                      <p className="text-gray-400 leading-relaxed font-light">Bases de datos reforzadas con backups asíncronos y protección activa contra inyecciones SQL y ataques DDoS. Tu dinero siempre está aislado de riesgos sistémicos.</p>
+                      <h4 className="text-xl font-bold mb-3 text-white">Tu Dinero Siempre Seguro</h4>
+                      <p className="text-gray-400 leading-relaxed font-light">Nuestra plataforma cuenta con respaldos constantes y protección avanzada contra intrusiones. Tu capital permanece intacto y aislado de riesgos.</p>
                   </motion.div>
                </div>
            </div>

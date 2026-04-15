@@ -21,13 +21,13 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-6 md:px-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
             <span className={`font-black text-2xl tracking-tighter text-[#1F2937] ${outfit.className}`}>
-            banco<span className="text-[#7C3AED]">UM</span>
+            banco<span className="text-banco-primary">UM</span>
             </span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="#inicio" className={`text-zinc-600 hover:text-[#7C3AED] transition-colors ${inter.className}`}>Inicio</Link>
-            <Link href="#beneficios" className={`text-zinc-600 hover:text-[#7C3AED] transition-colors ${inter.className}`}>Beneficios</Link>
-            <Link href="#seguridad" className={`text-zinc-600 hover:text-[#7C3AED] transition-colors ${inter.className}`}>Seguridad</Link>
+            <Link href="#inicio" className={`text-zinc-600 hover:text-banco-primary relative after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[1.5px] after:bg-banco-primary after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left transition-colors ${inter.className}`}>Inicio</Link>
+            <Link href="#beneficios" className={`text-zinc-600 hover:text-banco-primary relative after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[1.5px] after:bg-banco-primary after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left transition-colors ${inter.className}`}>Beneficios</Link>
+            <Link href="#seguridad" className={`text-zinc-600 hover:text-banco-primary relative after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[1.5px] after:bg-banco-primary after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left transition-colors ${inter.className}`}>Seguridad</Link>
         </div>
         <div className="flex items-center gap-2 md:gap-4">
             <Link href="/login" className="px-5 py-2.5 bg-white/30 backdrop-blur-md border border-white/40 shadow-sm hover:bg-white/50 text-[#1F2937] hover:text-[#7C3AED] font-bold text-sm rounded-full transition-all">

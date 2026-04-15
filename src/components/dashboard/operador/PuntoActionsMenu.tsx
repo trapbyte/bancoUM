@@ -59,7 +59,7 @@ export function PuntoActionsMenu({ puntoId, nombrePunto, activoActual, empleados
       {open && (
         <div className="absolute bottom-full right-0 mb-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
           <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Gestión</p>
+            <p className="text-sm font-semibold text-slate-700 ml-1 tracking-widest">Gestión</p>
             <p className="text-sm font-bold text-slate-800 truncate mt-0.5">{nombrePunto}</p>
           </div>
 

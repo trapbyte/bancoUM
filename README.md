@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# BancoUM - Sistema de Gestión Bancaria Institucional
 
-## Getting Started
+BancoUM es una plataforma moderna, segura e interactiva diseñada para la gestión integral de productos financieros y clientes. Desarrollada con un enfoque "glassmorfista" y UX intuitiva, permite operaciones bancarias en tiempo real, administración de roles y auditoría profunda de movimientos.
 
-First, run the development server:
+## 🚀 Descripción del Proyecto
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Este sistema bancario fue diseñado bajo una arquitectura web de última generación, priorizando la experiencia de usuario (UX) mediante una interfaz interactiva, limpia y rápida, al mismo tiempo que garantiza la integridad, seguridad y trazabilidad de cada transacción en la base de datos subyacente.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Stack Tecnológico
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El proyecto está soportado por un ecosistema Fullstack Serverless:
+*   **Frontend:** React 19, Next.js (App Router), Tailwind CSS v4, Lucide React.
+*   **Backend & API:** Next.js Serverless Functions (Route Handlers).
+*   **Autenticación:** NextAuth.js (v4) con custom credentials provider.
+*   **Base de Datos & ORM:** PostgreSQL (Supabase), Prisma ORM.
+*   **Mapas e Integraciones:** React-Leaflet y Nominatim API (OpenStreetMap).
+*   **Despliegue:** Vercel (Frontend), Supabase (Base de Datos).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 👩‍💻 Roles del Sistema
 
-## Learn More
+| Rol | Nivel de Acceso | Descripción |
+| :--- | :--- | :--- |
+| **CLIENTE** | Básico / Consumidor | Acceso a sus propias cuentas, tarjeta virtual, historial de movimientos, realizar transferencias y gestionar su perfil. |
+| **ASESOR** | Operativo | Encargado del servicio al cliente. Puede crear cuentas, visualizar listados de clientes y ver transacciones. |
+| **OPERADOR** | Infraestructura | Controla la red física del banco. Crea y edita puntos de atención (sucursales, cajeros), gestiona empleados y tipos de cuentas. |
+| **ADMIN** | Total / Auditoría | Visión global. Administra accesos de usuarios, revisa dashboards estadísticos y analiza los logs de auditoría general. |
 
-To learn more about Next.js, take a look at the following resources:
+## 🔒 Seguridad
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+*   Protección de rutas con Middleware de NextAuth.
+*   Cifrado de contraseñas de sesión (Bcrypt).
+*   Manejo de estados ACID en las transacciones directamente en la base de datos PostgreSQL.
+*   Consultas parametrizadas (Prevenidas contra SQL Injection vía Prisma ORM).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Desarrollado para la asignatura Sistemas de Bases de Datos II - Universidad de Manizales.*

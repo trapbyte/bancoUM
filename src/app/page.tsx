@@ -30,7 +30,7 @@ export default function Home() {
             </div>
             <div className="hidden md:block w-px h-6 bg-zinc-700"></div>
             <div className="flex items-center gap-3 text-white text-sm md:text-base font-medium">
-              Soporte técnico real <span className="font-bold text-[#A78BFA]">24/7/365</span>
+              Soporte técnico <span className="font-bold text-[#A78BFA]">24/7/365</span>
             </div>
             <div className="hidden md:block w-px h-6 bg-zinc-700"></div>
             <div className="flex items-center gap-3 text-white text-sm md:text-base font-medium">

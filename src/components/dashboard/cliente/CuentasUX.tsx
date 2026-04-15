@@ -47,11 +47,11 @@ export function BtnCrearCuenta({ reachedLimit }: { reachedLimit: boolean }) {
       </button>
 
       {open && mounted && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-[2px] p-4">
-          <div className="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4">
+          <div className="bg-white/90 backdrop-blur-2xl border border-white/20 p-8 rounded-[2rem] w-full max-w-md shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-slate-800">Seleccionar Producto</h2>
-              <button title="Cerrar" onClick={() => setOpen(false)} className="p-2 border border-slate-300 bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 rounded-full shadow-sm"><X className="w-6 h-6"/></button>
+              <button title="Cerrar" onClick={() => setOpen(false)} className="p-2 bg-slate-100/50 text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 rounded-full backdrop-blur-md transition-all"><X className="w-6 h-6"/></button>
             </div>
             
             {error && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-sm font-bold rounded-lg">{error}</div>}
@@ -140,19 +140,19 @@ export function BtnTransaccionesModal({ cuenta, misCuentas }: { cuenta: any, mis
       </button>
 
       {open && mounted && createPortal(
-         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-[2px] p-4 text-left">
-           <div className="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl animate-in zoom-in duration-200">
+         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4 text-left">
+           <div className="bg-white/90 backdrop-blur-2xl border border-white/20 p-8 rounded-[2rem] w-full max-w-lg shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] animate-in zoom-in-95 duration-300">
              
              <div className="flex justify-between items-center mb-6">
                 <h4 className="font-black text-slate-800 text-2xl">Operar Cuenta</h4>
-                <button onClick={() => setOpen(false)} className="p-2 border border-slate-300 bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 rounded-full shadow-sm"><X className="w-6 h-6"/></button>
+                <button onClick={() => setOpen(false)} className="p-2 bg-slate-100/50 text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 rounded-full backdrop-blur-md transition-all"><X className="w-6 h-6"/></button>
              </div>
 
-             <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
-               <button onClick={() => setTxModalMode(esCR ? "COMPRA_TARJETA" : "TRANSFERENCIA")} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${['TRANSFERENCIA', 'COMPRA_TARJETA'].includes(txModalMode) ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
+             <div className="flex bg-slate-100/50 p-1.5 rounded-2xl mb-8 backdrop-blur-md border border-slate-200/50">
+               <button onClick={() => setTxModalMode(esCR ? "COMPRA_TARJETA" : "TRANSFERENCIA")} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${['TRANSFERENCIA', 'COMPRA_TARJETA'].includes(txModalMode) ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
                  {esCR ? "Realizar Compra" : "Transferir"}
                </button>
-               <button onClick={() => setTxModalMode(esCR ? "PAGO" : "DEPOSITO")} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${['DEPOSITO', 'PAGO'].includes(txModalMode) ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
+               <button onClick={() => setTxModalMode(esCR ? "PAGO" : "DEPOSITO")} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${['DEPOSITO', 'PAGO'].includes(txModalMode) ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
                  {esCR ? "Pagar Tarjeta" : "Depositar"}
                </button>
              </div>
@@ -165,7 +165,7 @@ export function BtnTransaccionesModal({ cuenta, misCuentas }: { cuenta: any, mis
                   {txModalMode === "TRANSFERENCIA" && (
                     <div>
                       <label className="text-xs font-bold text-slate-500 block mb-2 uppercase tracking-wide text-left">ID o Nro. Cuenta Destino</label>
-                      <input name="destino_num" type="text" required placeholder="Ej: 4 (ID) o AHO-12..." className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-50" />
+                      <input name="destino_num" type="text" required placeholder="Ej: 4 (ID) o AHO-12..." className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-lg font-mono focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10 transition-all shadow-inner" />
                     </div>
                   )}
 
@@ -242,23 +242,40 @@ export function BtnVirtualCardDrawer({ cuenta, holderName, ultimosMovimientos }:
     <>
       <button 
         onClick={() => setOpen(true)}
-        className="flex-1 flex gap-2 items-center justify-center bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-violet-300 hover:shadow text-slate-800 text-sm font-bold py-2.5 rounded-xl transition-all"
+        className="flex-1 flex gap-2 items-center justify-center bg-gradient-to-b from-white to-slate-50 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-indigo-300 text-slate-800 text-sm font-bold py-3 rounded-2xl transition-all hover:-translate-y-0.5 active:translate-y-0"
       >
-        <Eye className="w-4 h-4 text-violet-600" /> Detalles
+        <div className="bg-indigo-100/80 p-1.5 rounded-lg"><Eye className="w-4 h-4 text-indigo-600" /></div>
+        Detalles
       </button>
 
       {open && mounted && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-[2px] p-4 text-left">
-          <div className="w-full max-w-xl bg-slate-50 rounded-3xl shadow-2xl p-8 overflow-y-auto max-h-[90vh] animate-in zoom-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 text-left sm:p-6">
+           {/* Backdrop con blur */}
+           <div 
+             className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+             onClick={() => setOpen(false)}
+           />
+
+          <div className="relative w-full max-w-2xl bg-white/95 backdrop-blur-3xl border border-white/40 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)] overflow-y-auto max-h-[90vh] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
              
              <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-black text-slate-800">Tarjeta Virtual y Movimientos</h3>
-               <button onClick={() => setOpen(false)} className="p-2 border border-slate-300 bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 rounded-full shadow-sm"><X className="w-6 h-6"/></button>
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-inner">
+                     <Eye className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-800 text-2xl tracking-tight">Tarjeta Virtual y Movimientos</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-none mt-1">
+                      Detalles de tu cuenta y transacciones recientes
+                    </p>
+                  </div>
+               </div>
+               <button onClick={() => setOpen(false)} className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-all active:scale-90"><X className="w-5 h-5"/></button>
              </div>
 
              {/* TARJETA VIRTUAL UI REDISEÑADA ESTÁTICA Y REALISTA */}
              <div className="flex justify-center mb-8">
-               <div className={`relative w-full max-w-[400px] aspect-[1.586/1] rounded-2xl p-6 overflow-hidden shadow-xl ${
+               <div className={`relative w-full max-w-[420px] aspect-[1.586/1] rounded-[2rem] p-8 shadow-2xl border border-white/10 backdrop-blur-3xl overflow-hidden shadow-xl ${
                   cuenta.tipo_cuenta.tipo === "TARJETA_CREDITO" ? 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800' :
                   cuenta.tipo_cuenta.tipo === "CORRIENTE" ? 'bg-gradient-to-tr from-indigo-700 via-indigo-600 to-purple-500 text-white' :
                   'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100'
@@ -333,12 +350,12 @@ export function BtnVirtualCardDrawer({ cuenta, holderName, ultimosMovimientos }:
                        const signo = esRechazado ? "✗" : esIngreso ? "+" : "-";
                        
                        return (
-                         <div key={Number(m.id_movimiento)} className={`flex justify-between items-center bg-white p-3 rounded-xl border transition-colors ${esRechazado ? 'border-rose-200 bg-rose-50/50' : 'border-slate-200'}`}>
+                         <div key={Number(m.id_movimiento)} className={`flex justify-between items-center bg-white/60 backdrop-blur-md p-4 rounded-2xl border transition-all hover:bg-white ${esRechazado ? 'border-rose-200 bg-rose-50/50' : 'border-slate-200'}`}>
                            <div>
                              <p className={`text-sm font-bold capitalize ${esRechazado ? 'text-rose-700' : 'text-slate-800'}`}>
                                 {m.tipo.toLowerCase().replace("_", " ")}
                              </p>
-                             <p className="text-[10px] text-slate-400 font-mono mt-0.5">{new Date(m.fecha).toLocaleDateString()}</p>
+                             <p className="text-xs text-slate-400 font-mono mt-1">{new Date(m.fecha).toLocaleDateString()}</p>
                            </div>
                            <div className="text-right">
                              <p className={`text-sm font-black ${esRechazado ? 'text-rose-500 opacity-70 line-through' : esIngreso ? 'text-emerald-600' : 'text-rose-600'}`}>

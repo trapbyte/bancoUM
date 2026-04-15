@@ -83,9 +83,9 @@ export function EmpleadoModal({
              </div>
              <div>
                 <h3 className="font-bold text-slate-800 text-lg">
-                  {userToEdit ? "Edición de Credencial IAM" : "Registro de Nuevo Ingreso"}
+                  {userToEdit ? "Editar Empleado" : "Nuevo Empleado"}
                 </h3>
-                <p className="text-xs font-bold text-slate-500">Global Corporate Directory</p>
+                <p className="text-xs font-bold text-slate-500">Gestión de Personal</p>
              </div>
            </div>
            
@@ -111,40 +111,40 @@ export function EmpleadoModal({
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Nombres</label>
-                 <input type="text" value={nombres} onChange={e => setNombres(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-bold focus:outline-none focus:border-violet-500" placeholder="Ej. Juan Carlos" />
+                 <label className="text-sm font-semibold text-slate-700 ml-1">Nombres</label>
+                 <input type="text" value={nombres} onChange={e => setNombres(e.target.value)} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]" placeholder="Ej. Juan Carlos" />
               </div>
               <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Apellidos</label>
-                 <input type="text" value={apellidos} onChange={e => setApellidos(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-bold focus:outline-none focus:border-violet-500" placeholder="Ej. Pérez Gómez" />
+                 <label className="text-sm font-semibold text-slate-700 ml-1">Apellidos</label>
+                 <input type="text" value={apellidos} onChange={e => setApellidos(e.target.value)} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]" placeholder="Ej. Pérez Gómez" />
               </div>
            </div>
 
            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Tipo ID</label>
-                 <select value={tipo_documento} onChange={e => setTipoDoc(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-bold focus:outline-none focus:border-violet-500">
+                 <label className="text-sm font-semibold text-slate-700 ml-1">Tipo ID</label>
+                 <select value={tipo_documento} onChange={e => setTipoDoc(e.target.value)} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]">
                     <option value="CC">Cédula</option>
                     <option value="CE">Cédula Ex.</option>
                     <option value="PASAPORTE">Pasaporte</option>
                  </select>
               </div>
               <div className="col-span-2 space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Número DNI</label>
-                 <input type="text" value={numero_documento} onChange={e => setNumDoc(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-bold focus:outline-none focus:border-violet-500" placeholder="Omitir puntos y comas" />
+                 <label className="text-sm font-semibold text-slate-700 ml-1">Número DNI</label>
+                 <input type="text" value={numero_documento} onChange={e => setNumDoc(e.target.value)} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]" placeholder="Omitir puntos y comas" />
               </div>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Correo Corporativo</label>
-                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-bold focus:outline-none focus:border-violet-500" placeholder="email@bancoum.com" />
+                 <label className="text-sm font-semibold text-slate-700 ml-1">Correo Corporativo</label>
+                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]" placeholder="email@bancoum.com" />
               </div>
               <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
+                 <label className="text-sm font-semibold text-slate-700 ml-1 flex items-center gap-1">
                     <Building className="w-3.5 h-3.5" /> Rol Organizacional
                  </label>
-                 <select value={cargo} onChange={e => setCargo(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-black focus:outline-none focus:border-violet-500">
+                 <select value={cargo} onChange={e => setCargo(e.target.value)} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all font-medium focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]">
                     <option value="Gerente_General">Gerente General</option>
                     <option value="SysAdmin">Administrador (SysAdmin)</option>
                     <option value="Operador_Backoffice">Operador BackOffice</option>
@@ -158,10 +158,10 @@ export function EmpleadoModal({
 
            {requiresPunto && (
              <div className="space-y-1 pt-4 border-t border-slate-100">
-                <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
-                   <MapPin className="w-3.5 h-3.5 text-rose-500" /> Adscripción Dinámica (Sucursal Obligatoria)
+                <label className="text-sm font-semibold text-slate-700 ml-1 flex items-center gap-1">
+                   <MapPin className="w-3.5 h-3.5 text-rose-500" /> Asignar Sucursal
                 </label>
-                <select value={idPunto} onChange={e => setIdPunto(e.target.value ? Number(e.target.value) : "")} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 font-bold focus:outline-none focus:border-violet-500">
+                <select value={idPunto} onChange={e => setIdPunto(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 focus:border-violet-600 focus:bg-white rounded-xl text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:shadow-[0_0_15px_rgba(124,58,237,0.1)]">
                    <option value="">-- SELECCIONA EL PUNTO DE TRABAJO --</option>
                    {puntosDisponibles.map(p => (
                        <option key={p.id_punto} value={p.id_punto}>
@@ -175,12 +175,12 @@ export function EmpleadoModal({
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 rounded-3xl flex justify-end gap-3">
            <button onClick={onClose} disabled={isPending} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 font-bold text-sm hover:bg-slate-100 transition-colors">
               Cancelar
            </button>
            <button onClick={handleSave} disabled={isPending} className="px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-sm shadow-md transition-all flex items-center gap-2">
-              {isPending ? "Procesando DB..." : "Guardar Registro"}
+              {isPending ? "Guardando..." : "Guardar Registro"}
            </button>
         </div>
 
