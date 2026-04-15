@@ -17,8 +17,8 @@ import {
 
 export function SparklineArea({ data, color = "#7C3AED", dataKey = "value" }: { data: any[], color?: string, dataKey?: string }) {
   return (
-    <div className="h-40 w-full mt-4">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-40 w-full mt-4" style={{ minWidth: 0, minHeight: 0 }}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id={`color-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
@@ -40,8 +40,8 @@ export function SparklineArea({ data, color = "#7C3AED", dataKey = "value" }: { 
 
 export function SimpleBarChart({ data, xKey = "name", yKey = "value", color = "#38bdf8" }: { data: any[], xKey?: string, yKey?: string, color?: string }) {
   return (
-    <div className="h-48 w-full mt-2">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-48 w-full mt-2" style={{ minWidth: 0, minHeight: 0 }}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
           <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
@@ -58,8 +58,8 @@ export function SimpleBarChart({ data, xKey = "name", yKey = "value", color = "#
 
 export function DonutChart({ data, colors = ["#8b5cf6", "#38bdf8", "#f43f5e", "#10b981"] }: { data: any[], colors?: string[] }) {
   return (
-    <div className="h-48 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-48 w-full" style={{ minWidth: 0, minHeight: 0 }}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         <PieChart>
           <Pie
             data={data}

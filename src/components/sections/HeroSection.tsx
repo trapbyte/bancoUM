@@ -16,7 +16,7 @@ export function HeroSection() {
           
           {/* Left: Content */}
           <div className="w-full lg:w-[50%] flex flex-col items-center lg:items-start text-center lg:text-left gap-6">
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
                   <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EDE9FE] text-[#7C3AED] font-semibold text-sm mb-2 border border-[#DDD6FE]">
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7C3AED] opacity-75"></span>
@@ -27,7 +27,7 @@ export function HeroSection() {
               </motion.div>
 
               <motion.h1
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
                   className={`text-5xl lg:text-7xl font-black leading-[1.1] text-[#111827] tracking-tight ${outfit.className}`}
               >
                   Tu dinero, <br className="hidden lg:block" />
@@ -37,14 +37,14 @@ export function HeroSection() {
               </motion.h1>
               
               <motion.p
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
                   className="text-lg md:text-xl text-[#4B5563] max-w-lg font-light leading-relaxed"
               >
                   Deja atrás la banca tradicional. Abre tu cuenta en minutos, obtén tarjetas virtuales gratuitas y toma el control total de tus finanzas desde tu celular.
               </motion.p>
               
               <motion.div 
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
                 className="flex flex-col sm:flex-row gap-4 mt-4"
               >
                   <Link href="/registro" className="px-10 py-4 bg-[#7C3AED] text-white hover:bg-[#682ad8] font-bold text-lg rounded-full transition-all shadow-[0_10px_30px_rgba(124,58,237,0.3)] hover:shadow-[0_10px_40px_rgba(124,58,237,0.5)] hover:-translate-y-1">

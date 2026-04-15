@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
       <aside className="w-64 shrink-0 bg-white border-r border-slate-200 flex flex-col shadow-sm relative z-20 overflow-y-auto">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-slate-100">
+        <div className="h-16 flex items-center px-6 border-b border-slate-200">
           <Link href="/" className={`font-black text-2xl tracking-tighter ${outfit.className}`}>
             banco<span className="text-violet-600">UM</span>
           </Link>
@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-sky-600/5 rounded-full blur-[100px] pointer-events-none" />
 
         {/* Top bar with glassmorphism */}
-        <header className="h-16 border-b border-white/20 px-8 flex items-center justify-between bg-white/60 backdrop-blur-xl shrink-0 sticky top-0 z-30 shadow-sm/50">
+        <header className="h-16 border-b border-slate-200 px-8 flex items-center justify-between bg-white/60 backdrop-blur-xl shrink-0 sticky top-0 z-30">
           <div />
           <div className="flex items-center gap-3 text-sm">
             <span className="text-slate-500 font-medium">{userEmail}</span>
@@ -161,7 +161,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <main
-          className="flex-1 overflow-x-hidden overflow-y-auto p-8 relative z-20 animate-in fade-in duration-200"
+          className="flex-1 overflow-x-hidden overflow-y-auto p-8 relative z-20"
         >
           {children}
         </main>
