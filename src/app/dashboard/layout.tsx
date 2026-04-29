@@ -8,7 +8,7 @@ import Link from "next/link";
 import {
   LayoutDashboard, CreditCard, ArrowLeftRight, User,
   Users, Settings, Building2, BookUser,
-  ShieldCheck, LogOut, ChevronRight, BarChart3,
+  ShieldCheck, LogOut, ChevronRight, BarChart3, Bot,
 } from "lucide-react";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["700", "800", "900"] });
@@ -39,6 +39,7 @@ const menus: Record<string, { label: string; href: string; icon: React.ReactNode
     { label: "Auditoría", href: "/dashboard/admin/auditoria", icon: <ShieldCheck className="w-4 h-4" /> },
     { label: "Usuarios", href: "/dashboard/admin/usuarios", icon: <Users className="w-4 h-4" /> },
     { label: "Estadísticas", href: "/dashboard/admin/estadisticas", icon: <BarChart3 className="w-4 h-4" /> },
+    { label: "Asistente IA", href: "/dashboard/admin/asistente", icon: <Bot className="w-4 h-4" /> },
   ],
 };
 

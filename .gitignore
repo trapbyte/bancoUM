@@ -54,3 +54,6 @@ AGENTS.md
 CLAUDE.md
 instructions.md
 roles.md
+
+# Archivos de IA python para el agente de querys SQL
+.venv/
